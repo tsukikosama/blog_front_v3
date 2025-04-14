@@ -44,6 +44,7 @@ export default {
   'menu.faq': '常见问题',
   'navbar.docs': '文档中心',
   'navbar.action.locale': '切换为中文',
+  'menu.blogUser': '博客用户',
   ...localeSettings,
   ...localeMessageBox,
   ...localeLogin,
