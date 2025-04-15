@@ -106,7 +106,7 @@
               <template #icon>
                 <icon-plus />
               </template>
-              {{ $t('searchTable.operation.create') }}
+              {{ $t('searchTable.operation.add') }}
             </a-button>
             <a-upload action="/">
               <template #upload-button>

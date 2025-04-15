@@ -25,3 +25,4 @@ export function getUserInfo() {
 export function getMenuList() {
   return axios.post<RouteRecordNormalized[]>('/admin/user/menu');
 }
+

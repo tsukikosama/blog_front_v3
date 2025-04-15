@@ -13,8 +13,8 @@
             <a-row :gutter="16">
               <a-col :span="8">
                 <a-form-item
-                    field="nickname"
-                    label="昵称"
+                    field="title"
+                    label="标题"
                 >
                   <a-input
                       v-model="formModel.nickname"
@@ -52,7 +52,7 @@
                 >
                   <a-select
                       v-model="formModel.ban"
-                      :options="userBanStatus"
+                      :options="userBanStaatus"
                       placeholder="请输入用户内容"
                       allow-clear
                   />
@@ -159,7 +159,19 @@
         <template #index="{ rowIndex }">
           {{ rowIndex + 1 + (pagination.current - 1) * pagination.pageSize }}
         </template>
-
+        <template #picture="{ record }">
+          <a-space>
+            <a-avatar
+                :size="50"
+                shape="square"
+            >
+              <img
+                  alt="avatar"
+                  :src="record.picture"
+              />
+            </a-avatar>
+          </a-space>
+        </template>
         <template #avatar="{ record }">
           <a-space>
             <a-avatar
@@ -176,14 +188,15 @@
         <template #filterType="{ record }">
           {{ $t(`searchTable.form.filterType.${record.filterType}`) }}
         </template>
-
+        <template #tagId="{ record }">
+          {{record.tagId}}
+        </template>
         <template #status="{ record }">
           <span v-if="record.status === 'offline'" class="circle"></span>
           <span v-else class="circle pass"></span>
           {{ $t(`searchTable.form.status.${record.status}`) }}
         </template>
         <template #operations="{ record }">
-
           <a-button  size="small" type="text" @click="deleteUser(record.id)">
             {{ $t('searchTable.columns.operations.delete') }}
           </a-button>
@@ -213,6 +226,7 @@ import type { SelectOptionData } from '@arco-design/web-vue/es/select/interface'
 import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
 import {deleteUserById, queryUser, resetPwd, userParams, userResponse} from "@/api/blog/user";
+import { queryBlog } from "@/api/blog/blog";
 import {Message} from "@arco-design/web-vue";
 
 type SizeProps = 'mini' | 'small' | 'medium' | 'large';
@@ -241,7 +255,7 @@ const formModalVisible = reactive({
 });
 const basePagination: Pagination = {
   current: 1,
-  pageSize: 20,
+  pageSize: 10,
 };
 const pagination = reactive({
   ...basePagination,
@@ -277,49 +291,47 @@ const columns = computed<TableColumnData[]>(() => [
     slotName: 'index',
   },
   {
+    title: t('标题'),
+    dataIndex: 'title',
+    slotName: 'title',
+  },
+  {
+    title: t('首图'),
+    dataIndex: 'picture',
+    slotName: 'picture',
+  },
+  {
+    title: t('内容'),
+    dataIndex: 'content',
+    slotName: 'content',
+    width:200,
+    ellipsis: true,
+    tooltip: true
+  },
+  {
+    title: t('发布日期'),
+    dataIndex: 'createDate',
+    slotName: 'createDate',
+  },
+  {
+    title: t('标签'),
+    dataIndex: 'tagId',
+    slotName: 'tagId',
+  },
+  {
+    title: t('流量次数'),
+    dataIndex: 'visit',
+    slotName: 'visit',
+  },
+  {
     title: t('用户名'),
-    dataIndex: 'username',
-    slotName: 'username',
-  },
-  {
-    title: t('头像'),
-    dataIndex: 'avatar',
-    slotName: 'avatar',
-  },
-  {
-    title: t('用户类型'),
-    dataIndex: 'userType',
-    slotName: 'userType',
-  },
-  {
-    title: t('邮箱'),
-    dataIndex: 'email',
-    slotName: 'email',
-  },
-  {
-    title: t('个人简介'),
-    dataIndex: 'about',
-    slotName: 'about',
-  },
-  {
-    title: t('昵称'),
     dataIndex: 'nickname',
     slotName: 'nickname',
   },
   {
-    title: t('封禁状态'),
-    dataIndex: 'ban',
-    slotName: 'ban',
-  },
-  {
-    title: t('注册时间'),
-    dataIndex: 'createTime',
-    slotName: 'createTime',
-  },
-  {
-    title: t('更新时间'),
-    dataIndex: 'updateTime',
-    slotName: 'updateTime',
+    title: t('用户头像'),
+    dataIndex: 'avatar',
+    slotName: 'avatar',
   },
   {
     title: t('searchTable.columns.operations'),
@@ -355,7 +367,7 @@ const fetchData = async (
 ) => {
   setLoading(true);
   try {
-    const { data } = await queryUser(params);
+    const { data } = await queryBlog(params);
     renderData.value = data.records;
     pagination.current = params.current;
     pagination.total = data.total;

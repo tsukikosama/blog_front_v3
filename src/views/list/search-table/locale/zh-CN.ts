@@ -19,6 +19,7 @@ export default {
   'searchTable.form.reset': '重置',
   'searchTable.form.selectDefault': '全部',
   'searchTable.operation.create': '新建',
+  'searchTable.operation.add': '新增',
   'searchTable.operation.import': '批量导入',
   'searchTable.operation.download': '下载',
   // columns
@@ -32,6 +33,7 @@ export default {
   'searchTable.columns.status': '状态',
   'searchTable.columns.operations': '操作',
   'searchTable.columns.operations.view': '查看',
+  'searchTable.columns.operations.delete': '删除',
 
   // size
   'searchTable.size.mini': '迷你',

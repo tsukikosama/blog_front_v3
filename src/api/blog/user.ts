@@ -38,3 +38,26 @@ export function queryUser(params: userParams) {
     },
   });
 }
+
+export function resetPwd(ids:number[]){
+  return axios.post('/admin/user/resetPwd',ids)
+}
+
+export function getUserInfoById(id : string){
+  return axios.get<userResponse>('/admin/user/detail',{
+        params: {
+          id,
+        },
+    paramsSerializer: (obj) => {
+      return qs.stringify(obj);
+    },
+  });
+}
+
+export function deleteUserById(ids : number[] ){
+  return axios.post('/admin/user/deleteBatch',ids)
+}
+
+export function saveUser(user : userResponse){
+  return axios.post('/admin/user/save',user);
+}
