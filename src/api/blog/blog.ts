@@ -12,7 +12,14 @@ export interface Blog {
     userId?: number; // 用户 ID
     state?: number; // 状态
 }
-export interface userListRes {
+export interface saveBlog {
+    id?:string,
+    title:string,
+    picture:string,
+    content:string,
+    tagId:number[],
+}
+export interface blogListRes {
     records: Blog[];
     total: number;
     size: number;
@@ -27,10 +34,19 @@ export interface blogParams {
 }
 
 export function queryBlog(params: blogParams) {
-    return axios.get<userListRes>('/admin/blog/list', {
+    return axios.get<blogListRes>('/admin/blog/list', {
         params,
         paramsSerializer: (obj) => {
             return qs.stringify(obj);
         },
     });
+}
+
+export function saveBlog(param : saveBlog){
+    return axios.post('/admin/blog/save',param)
+}
+
+export function getBlogById(id:string){
+    console.log(id)
+    return axios.get<Blog>(`/admin/blog/${id}`)
 }

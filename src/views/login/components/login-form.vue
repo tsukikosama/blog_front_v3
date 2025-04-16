@@ -101,6 +101,7 @@
     if (!errors) {
       setLoading(true);
       try {
+        console.log(import.meta.env.VITE_API_BASE_URL)
         await userStore.login(values as LoginData);
         const { redirect, ...othersQuery } = router.currentRoute.value.query;
         router.push({

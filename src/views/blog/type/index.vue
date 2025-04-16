@@ -84,11 +84,16 @@
         <a-col :span="12">
           <a-space>
             <a-button type="primary"
-                @click="addOrUpdate()">
+                      @click="
+                () => {
+                  formModalVisible.visible = true;
+                  formModalVisible.id = '';
+                }
+              ">
               <template #icon>
                 <icon-plus />
               </template>
-              发布
+              {{ $t('searchTable.operation.create') }}
             </a-button>
             <a-upload action="/">
               <template #upload-button>
@@ -176,15 +181,20 @@
         <template #filterType="{ record }">
           {{ $t(`searchTable.form.filterType.${record.filterType}`) }}
         </template>
-
+        <template #tagId="{ record }">
+          {{record.tagId}}
+        </template>
         <template #status="{ record }">
           <span v-if="record.status === 'offline'" class="circle"></span>
           <span v-else class="circle pass"></span>
           {{ $t(`searchTable.form.status.${record.status}`) }}
         </template>
         <template #operations="{ record }">
-          <a-button  size="small" type="text" @click="addOrUpdate(record.id)">
-            编辑
+          <a-button  size="small" type="text" @click="deleteUser(record.id)">
+            {{ $t('searchTable.columns.operations.delete') }}
+          </a-button>
+          <a-button  size="small" type="text">
+            封禁
           </a-button>
         </template>
       </a-table>
@@ -199,7 +209,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, watch} from 'vue';
+import { computed, ref, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import useLoading from '@/hooks/loading';
 import FormModal from '@/views/blog/user/form-model.vue';
@@ -208,8 +218,9 @@ import { Pagination } from '@/types/global';
 import type { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
 import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
-import {Blog, blogParams, queryBlog} from "@/api/blog/blog";
-import {useRouter} from "vue-router";
+import {deleteUserById, queryUser, resetPwd, userParams, userResponse} from "@/api/blog/user";
+import { queryBlog } from "@/api/blog/blog";
+import {Message} from "@arco-design/web-vue";
 
 type SizeProps = 'mini' | 'small' | 'medium' | 'large';
 type Column = TableColumnData & { checked?: true };
@@ -224,11 +235,11 @@ const generateFormModel = () => {
 };
 const { loading, setLoading } = useLoading(true);
 const { t } = useI18n();
-const renderData = ref<Blog[]>([]);
+const renderData = ref<userResponse[]>([]);
 const formModel = ref(generateFormModel());
 const cloneColumns = ref<Column[]>([]);
 const showColumns = ref<Column[]>([]);
-const router = useRouter();
+
 const size = ref<SizeProps>('medium');
 
 const formModalVisible = reactive({
@@ -332,10 +343,20 @@ const contentTypeOptions = computed<SelectOptionData[]>(() => [
   },
 
 ]);
+const userBanStatus = computed<SelectOptionData[]>(() => [
+  {
+    label: "禁用",
+    value: '0',
+  },
+  {
+    label: "正常",
+    value: '1',
+  },
 
+]);
 
 const fetchData = async (
-    params: blogParams = { current: 1, pageSize: 20 }
+    params: userParams = { current: 1, pageSize: 20 }
 ) => {
   setLoading(true);
   try {
@@ -366,8 +387,16 @@ const reset = () => {
   formModel.value = generateFormModel();
 };
 
-const addOrUpdate = (id?:string) => {
-  router.push({ name: 'addBlog', params: { id } });
+const handleSelectDensity = (
+    val: string | number | Record<string, any> | undefined,
+    e: Event
+) => {
+  size.value = val as SizeProps;
+};
+const resetPassword = async (ids:number[]) => {
+  const { data } =  await resetPwd(ids);
+
+  Message.success(data);
 }
 
 
@@ -383,6 +412,11 @@ watch(
     { deep: true, immediate: true }
 );
 
+const deleteUser =async (id:number) => {
+  const {data} = await deleteUserById([id])
+  Message.success(data);
+  search()
+}
 </script>
 
 

@@ -13,11 +13,21 @@ const DASHBOARD: AppRouteRecordRaw = {
     },
     children: [
         {
-            path: '/blogList',
-            name: '/博客列表',
+            path: 'blogList',
+            name: 'blogList',
             component: () => import('@/views/blog/blog/index.vue'),
             meta: {
                 locale: '博客列表',
+                requiresAuth: true,
+                roles: ['*'],
+            },
+        },
+        {
+            path: 'addBlog/:id?',
+            name: 'addBlog',
+            component: () => import('@/views/blog/blog/add_or_update.vue'),
+            meta: {
+                locale: '发布博客',
                 requiresAuth: true,
                 roles: ['*'],
             },
