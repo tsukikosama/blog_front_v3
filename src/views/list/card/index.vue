@@ -41,9 +41,7 @@
 </script>
 
 <script lang="ts">
-  export default {
-    name: 'Card',
-  };
+
 </script>
 
 <style scoped lang="less">

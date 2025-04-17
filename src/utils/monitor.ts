@@ -19,7 +19,7 @@ export default function handleError(Vue: App, baseUrl: string) {
       // message: err.message,
       // stack: err.stack,
       // browserInfo: getBrowserInfo(),
-      // user info
+      // blogUser info
       // dom info
       // url info
       // ...

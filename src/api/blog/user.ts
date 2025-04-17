@@ -31,7 +31,7 @@ export interface userParams {
   pageSize: number;
 }
 export function queryUser(params: userParams) {
-  return axios.get<userListRes>('/admin/user/list', {
+  return axios.get<userListRes>('/admin/user/page', {
     params,
     paramsSerializer: (obj) => {
       return qs.stringify(obj);

@@ -3,10 +3,10 @@ import setupMock, { successResponseWrap } from '@/utils/setup-mock';
 
 setupMock({
   setup() {
-    Mock.mock(new RegExp('/api/user/save-info'), () => {
+    Mock.mock(new RegExp('/api/blogUser/save-info'), () => {
       return successResponseWrap('ok');
     });
-    Mock.mock(new RegExp('/api/user/certification'), () => {
+    Mock.mock(new RegExp('/api/blogUser/certification'), () => {
       return successResponseWrap({
         enterpriseInfo: {
           accountType: '企业账号',
@@ -35,7 +35,7 @@ setupMock({
         ],
       });
     });
-    Mock.mock(new RegExp('/api/user/upload'), () => {
+    Mock.mock(new RegExp('/api/blogUser/upload'), () => {
       return successResponseWrap('ok');
     });
   },

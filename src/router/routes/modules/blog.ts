@@ -1,6 +1,7 @@
 import { DEFAULT_LAYOUT } from '../base';
 import { AppRouteRecordRaw } from '../types';
 
+
 const DASHBOARD: AppRouteRecordRaw = {
     path: '/blog',
     name: 'blog',
@@ -9,28 +10,29 @@ const DASHBOARD: AppRouteRecordRaw = {
         locale: 'menu.blog',
         requiresAuth: true,
         icon: 'icon-dashboard',
-        order: 4,
+        order: 10,
     },
     children: [
         {
-            path: 'blogList',
-            name: 'blogList',
-            component: () => import('@/views/blog/blog/index.vue'),
+            path: 'bloglist',
+            name: 'bloglist',
+            component: () => import('@/views/blog/index.vue'),
             meta: {
-                locale: '博客列表',
+                locale: 'menu.blog.bloglist',
                 requiresAuth: true,
                 roles: ['*'],
             },
         },
         {
-            path: 'addBlog/:id?',
-            name: 'addBlog',
-            component: () => import('@/views/blog/blog/add_or_update.vue'),
+            path: 'blogedit/:id?',
+            name: 'blogedit',
+            component: () => import('@/views/blog/add-or-update.vue'),
             meta: {
-                locale: '发布博客',
+                locale: 'menu.blog.blogedit',
                 requiresAuth: true,
                 roles: ['*'],
             },
+
         },
     ],
 };

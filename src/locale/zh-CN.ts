@@ -45,12 +45,16 @@ export default {
   'navbar.docs': '文档中心',
   'navbar.action.locale': '切换为中文',
   'menu.blogUser': '博客用户',
+  'menu.blogUser.list': '博客用户列表',
   'menu.blog': '博客',
+  'menu.blog.list': '博客列表',
+  'menu.blog.edit': '博客编辑',
+  'menu.type': '标签',
+  'menu.type.list': '标签列表',
   ...localeSettings,
   ...localeMessageBox,
   ...localeLogin,
   ...localeWorkplace,
-
   ...localeMonitor,
   ...localeSearchTable,
   ...localeCardList,
@@ -66,4 +70,5 @@ export default {
   ...locale500,
   ...localeUserInfo,
   ...localeUserSetting,
+
 };

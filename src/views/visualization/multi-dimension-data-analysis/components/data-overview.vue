@@ -129,7 +129,7 @@
       title: t('multiDAnalysis.dataOverview.activeUsers'),
       value: 1275,
       prefix: {
-        icon: 'icon-user',
+        icon: 'icon-blogUser',
         background: isDark.value ? '#3F385E' : '#F5E8FF',
         iconColor: isDark.value ? '#8558D3' : '#722ED1',
       },

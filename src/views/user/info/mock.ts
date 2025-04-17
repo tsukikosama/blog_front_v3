@@ -4,7 +4,7 @@ import setupMock, { successResponseWrap } from '@/utils/setup-mock';
 setupMock({
   setup() {
     // 最新项目
-    Mock.mock(new RegExp('/api/user/my-project/list'), () => {
+    Mock.mock(new RegExp('/api/blogUser/my-project/list'), () => {
       const contributors = [
         {
           name: '秦臻宇',
@@ -75,7 +75,7 @@ setupMock({
     });
 
     // 最新动态
-    Mock.mock(new RegExp('/api/user/latest-activity'), () => {
+    Mock.mock(new RegExp('/api/blogUser/latest-activity'), () => {
       return successResponseWrap(
         new Array(7).fill(null).map((_item, index) => ({
           id: index,
@@ -88,7 +88,7 @@ setupMock({
     });
 
     // 访问量
-    Mock.mock(new RegExp('/api/user/visits'), () => {
+    Mock.mock(new RegExp('/api/blogUser/visits'), () => {
       return successResponseWrap([
         {
           name: '主页访问量',
@@ -104,7 +104,7 @@ setupMock({
     });
 
     // 项目和团队列表
-    Mock.mock(new RegExp('/api/user/project-and-team/list'), () => {
+    Mock.mock(new RegExp('/api/blogUser/project-and-team/list'), () => {
       return successResponseWrap([
         {
           id: 1,
@@ -126,7 +126,7 @@ setupMock({
     });
 
     // 团队列表
-    Mock.mock(new RegExp('/api/user/my-team/list'), () => {
+    Mock.mock(new RegExp('/api/blogUser/my-team/list'), () => {
       return successResponseWrap([
         {
           id: 1,

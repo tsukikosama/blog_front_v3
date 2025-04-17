@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <Breadcrumb :items="['博客', '博客列表']" />
-    <a-card class="general-card" :title="$t('博客列表')">
+    <Breadcrumb :items="['用户', '用户列表']" />
+    <a-card class="general-card" :title="$t('用户列表')">
       <a-row>
         <a-col :flex="1">
           <a-form
@@ -13,8 +13,8 @@
             <a-row :gutter="16">
               <a-col :span="8">
                 <a-form-item
-                    field="title"
-                    label="标题"
+                    field="nickname"
+                    label="昵称"
                 >
                   <a-input
                       v-model="formModel.nickname"
@@ -52,7 +52,7 @@
                 >
                   <a-select
                       v-model="formModel.ban"
-                      :options="userBanStaatus"
+                      :options="userBanStatus"
                       placeholder="请输入用户内容"
                       allow-clear
                   />
@@ -84,11 +84,16 @@
         <a-col :span="12">
           <a-space>
             <a-button type="primary"
-                @click="addOrUpdate()">
+                @click="
+                () => {
+                  formModalVisible.visible = true;
+                  formModalVisible.id = '';
+                }
+              ">
               <template #icon>
                 <icon-plus />
               </template>
-              发布
+              {{ $t('searchTable.operation.create') }}
             </a-button>
             <a-upload action="/">
               <template #upload-button>
@@ -97,39 +102,26 @@
                 </a-button>
               </template>
             </a-upload>
-
+            <a-button type="primary" @click="() => {
+                resetPassword(selectedKeys)
+            }">
+              <template #icon>
+                <icon-command />
+              </template>
+             重置密码
+            </a-button>
           </a-space>
         </a-col>
         <a-col
             :span="12"
             style="display: flex; align-items: center; justify-content: end"
         >
-          <a-button>
-            <template #icon>
-              <icon-download />
-            </template>
-            {{ $t('searchTable.operation.download') }}
-          </a-button>
+
           <a-tooltip :content="$t('searchTable.actions.refresh')">
             <div class="action-icon" @click="search"
             ><icon-refresh size="18"
             /></div>
           </a-tooltip>
-          <a-dropdown @select="handleSelectDensity">
-            <a-tooltip :content="$t('searchTable.actions.density')">
-              <div class="action-icon"><icon-line-height size="18" /></div>
-            </a-tooltip>
-            <template #content>
-              <a-doption
-                  v-for="item in densityList"
-                  :key="item.value"
-                  :value="item.value"
-                  :class="{ active: item.value === size }"
-              >
-                <span>{{ item.name }}</span>
-              </a-doption>
-            </template>
-          </a-dropdown>
         </a-col>
       </a-row>
       <a-table
@@ -147,19 +139,7 @@
         <template #index="{ rowIndex }">
           {{ rowIndex + 1 + (pagination.current - 1) * pagination.pageSize }}
         </template>
-        <template #picture="{ record }">
-          <a-space>
-            <a-avatar
-                :size="50"
-                shape="square"
-            >
-              <img
-                  alt="avatar"
-                  :src="record.picture"
-              />
-            </a-avatar>
-          </a-space>
-        </template>
+
         <template #avatar="{ record }">
           <a-space>
             <a-avatar
@@ -183,35 +163,39 @@
           {{ $t(`searchTable.form.status.${record.status}`) }}
         </template>
         <template #operations="{ record }">
-          <a-button  size="small" type="text" @click="addOrUpdate(record.id)">
-            编辑
+
+          <a-button  size="small" type="text" @click="deleteUser(record.id)">
+            {{ $t('searchTable.columns.operations.delete') }}
+          </a-button>
+          <a-button  size="small" type="text">
+            封禁
           </a-button>
         </template>
       </a-table>
     </a-card>
+    <form-modal
+        :id="formModalVisible.id"
+        v-model:visible="formModalVisible.visible"
+        @success="fetchData()"
+    >
+    </form-modal>
   </div>
-  <form-modal
-      :id="formModalVisible.id"
-      v-model:visible="formModalVisible.visible"
-      @success="fetchData()"
-  >
-  </form-modal>
+
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, watch} from 'vue';
+import { computed, ref, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import useLoading from '@/hooks/loading';
-import FormModal from '@/views/blog/user/form-model.vue';
+import FormModal from '@/views/blogUser/form-model.vue';
 import { PolicyParams } from '@/api/list';
 import { Pagination } from '@/types/global';
 import type { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
 import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
-import {Blog, blogParams, queryBlog} from "@/api/blog/blog";
-import {useRouter} from "vue-router";
+import {deleteUserById, queryUser, resetPwd, userParams, userResponse} from "@/api/blog/user";
+import {Message} from "@arco-design/web-vue";
 
-type SizeProps = 'mini' | 'small' | 'medium' | 'large';
 type Column = TableColumnData & { checked?: true };
 
 const generateFormModel = () => {
@@ -224,12 +208,11 @@ const generateFormModel = () => {
 };
 const { loading, setLoading } = useLoading(true);
 const { t } = useI18n();
-const renderData = ref<Blog[]>([]);
+const renderData = ref<userResponse[]>([]);
 const formModel = ref(generateFormModel());
 const cloneColumns = ref<Column[]>([]);
 const showColumns = ref<Column[]>([]);
-const router = useRouter();
-const size = ref<SizeProps>('medium');
+
 
 const formModalVisible = reactive({
   visible: false,
@@ -237,7 +220,7 @@ const formModalVisible = reactive({
 });
 const basePagination: Pagination = {
   current: 1,
-  pageSize: 10,
+  pageSize: 20,
 };
 const pagination = reactive({
   ...basePagination,
@@ -248,24 +231,6 @@ const rowSelection = reactive({
   showCheckedAll: true,
   onlyCurrent: false,
 });
-const densityList = computed(() => [
-  {
-    name: t('searchTable.size.mini'),
-    value: 'mini',
-  },
-  {
-    name: t('searchTable.size.small'),
-    value: 'small',
-  },
-  {
-    name: t('searchTable.size.medium'),
-    value: 'medium',
-  },
-  {
-    name: t('searchTable.size.large'),
-    value: 'large',
-  },
-]);
 const columns = computed<TableColumnData[]>(() => [
   {
     title: t('searchTable.columns.index'),
@@ -273,47 +238,49 @@ const columns = computed<TableColumnData[]>(() => [
     slotName: 'index',
   },
   {
-    title: t('标题'),
-    dataIndex: 'title',
-    slotName: 'title',
-  },
-  {
-    title: t('首图'),
-    dataIndex: 'picture',
-    slotName: 'picture',
-  },
-  {
-    title: t('内容'),
-    dataIndex: 'content',
-    slotName: 'content',
-    width:200,
-    ellipsis: true,
-    tooltip: true
-  },
-  {
-    title: t('发布日期'),
-    dataIndex: 'createDate',
-    slotName: 'createDate',
-  },
-  {
-    title: t('标签'),
-    dataIndex: 'tagId',
-    slotName: 'tagId',
-  },
-  {
-    title: t('流量次数'),
-    dataIndex: 'visit',
-    slotName: 'visit',
-  },
-  {
     title: t('用户名'),
+    dataIndex: 'username',
+    slotName: 'username',
+  },
+  {
+    title: t('头像'),
+    dataIndex: 'avatar',
+    slotName: 'avatar',
+  },
+  {
+    title: t('用户类型'),
+    dataIndex: 'userType',
+    slotName: 'userType',
+  },
+  {
+    title: t('邮箱'),
+    dataIndex: 'email',
+    slotName: 'email',
+  },
+  {
+    title: t('个人简介'),
+    dataIndex: 'about',
+    slotName: 'about',
+  },
+  {
+    title: t('昵称'),
     dataIndex: 'nickname',
     slotName: 'nickname',
   },
   {
-    title: t('用户头像'),
-    dataIndex: 'avatar',
-    slotName: 'avatar',
+    title: t('封禁状态'),
+    dataIndex: 'ban',
+    slotName: 'ban',
+  },
+  {
+    title: t('注册时间'),
+    dataIndex: 'createTime',
+    slotName: 'createTime',
+  },
+  {
+    title: t('更新时间'),
+    dataIndex: 'updateTime',
+    slotName: 'updateTime',
   },
   {
     title: t('searchTable.columns.operations'),
@@ -332,14 +299,24 @@ const contentTypeOptions = computed<SelectOptionData[]>(() => [
   },
 
 ]);
+const userBanStatus = computed<SelectOptionData[]>(() => [
+  {
+    label: "禁用",
+    value: '0',
+  },
+  {
+    label: "正常",
+    value: '1',
+  },
 
+]);
 
 const fetchData = async (
-    params: blogParams = { current: 1, pageSize: 20 }
+    params: userParams = { current: 1, pageSize: 20 }
 ) => {
   setLoading(true);
   try {
-    const { data } = await queryBlog(params);
+    const { data } = await queryUser(params);
     renderData.value = data.records;
     pagination.current = params.current;
     pagination.total = data.total;
@@ -350,7 +327,7 @@ const fetchData = async (
     setLoading(false);
   }
 };
-
+fetchData();
 const search = () => {
   fetchData({
     ...basePagination,
@@ -361,13 +338,15 @@ const onPageChange = (current: number) => {
   fetchData({ ...basePagination, current });
 };
 
-fetchData();
+
 const reset = () => {
   formModel.value = generateFormModel();
 };
 
-const addOrUpdate = (id?:string) => {
-  router.push({ name: 'addBlog', params: { id } });
+const resetPassword = async (ids:number[]) => {
+     const { data } =  await resetPwd(ids);
+
+     Message.success(data);
 }
 
 
@@ -383,6 +362,11 @@ watch(
     { deep: true, immediate: true }
 );
 
+const deleteUser =async (id:number) => {
+  const {data} = await deleteUserById([id])
+  Message.success(data);
+  search()
+}
 </script>
 
 

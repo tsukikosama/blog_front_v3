@@ -43,17 +43,17 @@ const useUserStore = defineStore('user', {
         resolve(this.role);
       });
     },
-    // Set user's information
+    // Set blogUser's information
     setInfo(partial: Partial<UserState>) {
       this.$patch(partial);
     },
 
-    // Reset user's information
+    // Reset blogUser's information
     resetInfo() {
       this.$reset();
     },
 
-    // Get user's information
+    // Get blogUser's information
     async info() {
       const res = await getUserInfo();
 

@@ -34,7 +34,7 @@ export interface blogParams {
 }
 
 export function queryBlog(params: blogParams) {
-    return axios.get<blogListRes>('/admin/blog/list', {
+    return axios.get<blogListRes>('/admin/blog/page', {
         params,
         paramsSerializer: (obj) => {
             return qs.stringify(obj);
@@ -44,6 +44,10 @@ export function queryBlog(params: blogParams) {
 
 export function saveBlog(param : saveBlog){
     return axios.post('/admin/blog/save',param)
+}
+
+export function updateBlog(param : saveBlog){
+    return axios.post('/admin/blog/update',param)
 }
 
 export function getBlogById(id:string){

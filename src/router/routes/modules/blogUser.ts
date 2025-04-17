@@ -2,22 +2,22 @@ import { DEFAULT_LAYOUT } from '../base';
 import { AppRouteRecordRaw } from '../types';
 
 const DASHBOARD: AppRouteRecordRaw = {
-  path: '/blogUser',
+  path: '/bloguser',
   name: 'blogUser',
   component: DEFAULT_LAYOUT,
   meta: {
     locale: 'menu.blogUser',
     requiresAuth: true,
     icon: 'icon-dashboard',
-    order: 3,
+    order: 11,
   },
   children: [
     {
-      path: '/list',
-      name: '/博客用户列表',
-      component: () => import('@/views/blog/user/index.vue'),
+      path: 'userlist',
+      name: 'userlist',
+      component: () => import('@/views/blogUser/index.vue'),
       meta: {
-        locale: '博客用户列表',
+        locale: 'menu.blogUser.list',
         requiresAuth: true,
         roles: ['*'],
       },

@@ -29,12 +29,15 @@
                 <a-upload
                     list-type="picture-card"
                     action="http://localhost:9001/admin/file/upload"
-                    limit="1"
                     image-preview
                     @success="handleUploadSuccess"
+                    v-model:file-list="imgList"
+
+                    limit="1"
                 />
               </a-form-item>
             </a-col>
+
             <a-col :span="8">
               <a-form-item
                   field="tag"
@@ -74,16 +77,16 @@
                  height="550px"
     ></v-md-editor>
 
-    </div>
+  </div>
 
 </template>
 
 <script setup lang="ts">
 import {onMounted, ref, watch} from 'vue'
 import {list, Types} from "@/api/blog/type";
-import {getBlogById, saveBlog} from "@/api/blog/blog";
+import {getBlogById, saveBlog, updateBlog} from "@/api/blog/blog";
 import {Message} from "@arco-design/web-vue";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 
 console.log("进入博客编辑页")
 
@@ -98,7 +101,7 @@ const generateFormModel = () => {
     content:''
   };
 };
-
+const imgList = ref<any[]>([])
 const formModel = ref(generateFormModel());
 
 const tagList = ref<Types[]>([] as Types[])
@@ -107,9 +110,17 @@ const getType = async () => {
   tagList.value = data
 }
 getType()
+const router = useRouter();
 const fieldNames = {value: 'id', label: 'tagName'}
 const submit = () => {
-  saveBlog(formModel.value)
+  //  判断formModel的id是否值
+  if (formModel.value.id != null){
+    updateBlog(formModel.value)
+  }else{
+    saveBlog(formModel.value)
+  }
+  Message.success("保存成功")
+  router.go(-1);
 }
 
 const handleUploadSuccess = (file: any) => {
@@ -117,26 +128,33 @@ const handleUploadSuccess = (file: any) => {
   Message.info("上传成功")
 };
 const route = useRoute()
-
-const fetchData = async () =>{
-  console.log(route.params.id)
-  const { data } = await getBlogById(route.params.id as string);
-  Object.assign(formModel.value, data)
-}
-fetchData()
-watch(
-    () => route.params.id,
-    async (newId, oldId) => {
-      if (newId && newId !== oldId) {
-        console.log("路由参数 ID 变化，重新加载数据");
-        await fetchData();
-      }
-    },
-    { immediate: true }
-)
+// 修改 fetchData 接口
+const fetchData = async (id: string) => {
+  if (route.params.id != null){
+    const { data } = await getBlogById(id);
+    imgList.value.push({
+      url: data.picture,
+      name: '图片',
+      uid: Date.now().toString(),
+      status: 'done' // ✅ 这一步非常关键
+    })
+    Object.assign(formModel.value, data);
+    //  获取到的data是字符串形式 需要进行切割
+    const s = data.tagId?.split(',') || []
+    const results = tagList.value
+        .filter(tag => s.includes(tag.id?.toString()))
+        .map(tag => tag.id); // 👈 只返回 id 列表
+    formModel.value.tagId = results
+  }
+};
 onMounted(() => {
-  console.log("组件加载了")
-})
+  const id = route.params.id as string;
+  if (id) {
+    fetchData(id);
+  }
+});
+
+
 </script>
 
 <style scoped>

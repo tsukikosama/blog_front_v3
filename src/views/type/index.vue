@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <Breadcrumb :items="['博客', '博客列表']" />
-    <a-card class="general-card" :title="$t('博客列表')">
+    <Breadcrumb :items="['标签', '标签列表']" />
+    <a-card class="general-card" :title="$t('标签列表')">
       <a-row>
         <a-col :flex="1">
           <a-form
@@ -13,47 +13,12 @@
             <a-row :gutter="16">
               <a-col :span="8">
                 <a-form-item
-                    field="title"
-                    label="标题"
+                    field="tagName"
+                    label="标签名"
                 >
                   <a-input
-                      v-model="formModel.nickname"
-                      placeholder="请输入昵称"
-                      allow-clear
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="8">
-                <a-form-item field="email" label="邮箱">
-                  <a-input
-                      v-model="formModel.email"
-                      placeholder="请输入邮箱"
-                      allow-clear
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="8">
-                <a-form-item
-                    field="userType"
-                    label="用户类型"
-                >
-                  <a-select
-                      v-model="formModel.userType"
-                      :options="contentTypeOptions"
-                      placeholder="请输入用户内容"
-                      allow-clear
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="8">
-                <a-form-item
-                    field="ban"
-                    label="用户状态"
-                >
-                  <a-select
-                      v-model="formModel.ban"
-                      :options="userBanStaatus"
-                      placeholder="请输入用户内容"
+                      v-model="formModel.tagName"
+                      placeholder="请输入标签名"
                       allow-clear
                   />
                 </a-form-item>
@@ -95,46 +60,18 @@
               </template>
               {{ $t('searchTable.operation.create') }}
             </a-button>
-            <a-upload action="/">
-              <template #upload-button>
-                <a-button>
-                  {{ $t('searchTable.operation.import') }}
-                </a-button>
-              </template>
-            </a-upload>
-
           </a-space>
         </a-col>
         <a-col
             :span="12"
             style="display: flex; align-items: center; justify-content: end"
         >
-          <a-button>
-            <template #icon>
-              <icon-download />
-            </template>
-            {{ $t('searchTable.operation.download') }}
-          </a-button>
+
           <a-tooltip :content="$t('searchTable.actions.refresh')">
             <div class="action-icon" @click="search"
             ><icon-refresh size="18"
             /></div>
           </a-tooltip>
-          <a-dropdown @select="handleSelectDensity">
-            <a-tooltip :content="$t('searchTable.actions.density')">
-              <div class="action-icon"><icon-line-height size="18" /></div>
-            </a-tooltip>
-            <template #content>
-              <a-doption
-                  v-for="item in densityList"
-                  :key="item.value"
-                  :value="item.value"
-                  :class="{ active: item.value === size }"
-              >
-                <span>{{ item.name }}</span>
-              </a-doption>
-            </template>
-          </a-dropdown>
         </a-col>
       </a-row>
       <a-table
@@ -152,19 +89,7 @@
         <template #index="{ rowIndex }">
           {{ rowIndex + 1 + (pagination.current - 1) * pagination.pageSize }}
         </template>
-        <template #picture="{ record }">
-          <a-space>
-            <a-avatar
-                :size="50"
-                shape="square"
-            >
-              <img
-                  alt="avatar"
-                  :src="record.picture"
-              />
-            </a-avatar>
-          </a-space>
-        </template>
+
         <template #avatar="{ record }">
           <a-space>
             <a-avatar
@@ -181,66 +106,62 @@
         <template #filterType="{ record }">
           {{ $t(`searchTable.form.filterType.${record.filterType}`) }}
         </template>
-        <template #tagId="{ record }">
-          {{record.tagId}}
-        </template>
+
         <template #status="{ record }">
           <span v-if="record.status === 'offline'" class="circle"></span>
           <span v-else class="circle pass"></span>
           {{ $t(`searchTable.form.status.${record.status}`) }}
         </template>
         <template #operations="{ record }">
-          <a-button  size="small" type="text" @click="deleteUser(record.id)">
+          <a-button  size="small" type="text" @click="deleteTag(record.id)">
+            更新
+          </a-button>
+          <a-button  size="small" type="text" @click="deleteTag(record.id)">
             {{ $t('searchTable.columns.operations.delete') }}
           </a-button>
-          <a-button  size="small" type="text">
-            封禁
-          </a-button>
+
         </template>
       </a-table>
     </a-card>
+    <form-modal
+        :id="formModalVisible.id"
+        v-model:visible="formModalVisible.visible"
+        @success="fetchData()"
+    >
+    </form-modal>
   </div>
-  <form-modal
-      :id="formModalVisible.id"
-      v-model:visible="formModalVisible.visible"
-      @success="fetchData()"
-  >
-  </form-modal>
+
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import useLoading from '@/hooks/loading';
-import FormModal from '@/views/blog/user/form-model.vue';
+import FormModal from '@/views/blogUser/form-model.vue';
 import { PolicyParams } from '@/api/list';
 import { Pagination } from '@/types/global';
 import type { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
 import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
 import {deleteUserById, queryUser, resetPwd, userParams, userResponse} from "@/api/blog/user";
-import { queryBlog } from "@/api/blog/blog";
 import {Message} from "@arco-design/web-vue";
+import {deleteTagById, queryType, typeListRes, Types} from "@/api/blog/type";
 
-type SizeProps = 'mini' | 'small' | 'medium' | 'large';
+
 type Column = TableColumnData & { checked?: true };
 
 const generateFormModel = () => {
   return {
-    nickname: '',
-    email: '',
-    ban: '',
-    userType: '',
+    tagName:''
   };
 };
 const { loading, setLoading } = useLoading(true);
 const { t } = useI18n();
-const renderData = ref<userResponse[]>([]);
+const renderData = ref<Types[]>([]);
 const formModel = ref(generateFormModel());
 const cloneColumns = ref<Column[]>([]);
 const showColumns = ref<Column[]>([]);
 
-const size = ref<SizeProps>('medium');
 
 const formModalVisible = reactive({
   visible: false,
@@ -259,24 +180,6 @@ const rowSelection = reactive({
   showCheckedAll: true,
   onlyCurrent: false,
 });
-const densityList = computed(() => [
-  {
-    name: t('searchTable.size.mini'),
-    value: 'mini',
-  },
-  {
-    name: t('searchTable.size.small'),
-    value: 'small',
-  },
-  {
-    name: t('searchTable.size.medium'),
-    value: 'medium',
-  },
-  {
-    name: t('searchTable.size.large'),
-    value: 'large',
-  },
-]);
 const columns = computed<TableColumnData[]>(() => [
   {
     title: t('searchTable.columns.index'),
@@ -284,83 +187,29 @@ const columns = computed<TableColumnData[]>(() => [
     slotName: 'index',
   },
   {
-    title: t('标题'),
-    dataIndex: 'title',
-    slotName: 'title',
+    title: t('标签名'),
+    dataIndex: 'tagName',
+    slotName: 'tagName',
   },
   {
-    title: t('首图'),
-    dataIndex: 'picture',
-    slotName: 'picture',
+    title: t('创建时间'),
+    dataIndex: 'createTime',
+    slotName: 'createTime',
   },
-  {
-    title: t('内容'),
-    dataIndex: 'content',
-    slotName: 'content',
-    width:200,
-    ellipsis: true,
-    tooltip: true
-  },
-  {
-    title: t('发布日期'),
-    dataIndex: 'createDate',
-    slotName: 'createDate',
-  },
-  {
-    title: t('标签'),
-    dataIndex: 'tagId',
-    slotName: 'tagId',
-  },
-  {
-    title: t('流量次数'),
-    dataIndex: 'visit',
-    slotName: 'visit',
-  },
-  {
-    title: t('用户名'),
-    dataIndex: 'nickname',
-    slotName: 'nickname',
-  },
-  {
-    title: t('用户头像'),
-    dataIndex: 'avatar',
-    slotName: 'avatar',
-  },
+
   {
     title: t('searchTable.columns.operations'),
     dataIndex: 'operations',
     slotName: 'operations',
   },
 ]);
-const contentTypeOptions = computed<SelectOptionData[]>(() => [
-  {
-    label: "会员",
-    value: '1',
-  },
-  {
-    label: "普通用户",
-    value: '0',
-  },
-
-]);
-const userBanStatus = computed<SelectOptionData[]>(() => [
-  {
-    label: "禁用",
-    value: '0',
-  },
-  {
-    label: "正常",
-    value: '1',
-  },
-
-]);
 
 const fetchData = async (
-    params: userParams = { current: 1, pageSize: 20 }
+    params: userParams = { current: 1, pageSize: 10 }
 ) => {
   setLoading(true);
   try {
-    const { data } = await queryBlog(params);
+    const { data } = await queryType(params);
     renderData.value = data.records;
     pagination.current = params.current;
     pagination.total = data.total;
@@ -371,7 +220,7 @@ const fetchData = async (
     setLoading(false);
   }
 };
-
+fetchData();
 const search = () => {
   fetchData({
     ...basePagination,
@@ -382,23 +231,16 @@ const onPageChange = (current: number) => {
   fetchData({ ...basePagination, current });
 };
 
-fetchData();
 const reset = () => {
   formModel.value = generateFormModel();
 };
 
-const handleSelectDensity = (
-    val: string | number | Record<string, any> | undefined,
-    e: Event
-) => {
-  size.value = val as SizeProps;
-};
-const resetPassword = async (ids:number[]) => {
-  const { data } =  await resetPwd(ids);
+const deleteTag = async (ids:number) => {
+   await deleteTagById([ids]);
 
-  Message.success(data);
+  Message.success("删除成功");
+  search()
 }
-
 
 watch(
     () => columns.value,
@@ -412,11 +254,6 @@ watch(
     { deep: true, immediate: true }
 );
 
-const deleteUser =async (id:number) => {
-  const {data} = await deleteUserById([id])
-  Message.success(data);
-  search()
-}
 </script>
 
 
