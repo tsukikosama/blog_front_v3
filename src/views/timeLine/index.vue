@@ -123,12 +123,12 @@
         </template>
       </a-table>
     </a-card>
-    <form-modal
-        :id="formModalVisible.id"
-        v-model:visible="formModalVisible.visible"
-        @success="fetchData()"
-    >
-    </form-modal>
+<!--    <form-modal-->
+<!--        :id="formModalVisible.id"-->
+<!--        v-model:visible="formModalVisible.visible"-->
+<!--        @success="fetchData()"-->
+<!--    >-->
+<!--    </form-modal>-->
   </div>
 </template>
 
@@ -136,7 +136,6 @@
 import { computed, ref, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import useLoading from '@/hooks/loading';
-import FormModal from '@/views/type/form-model.vue'
 import { PolicyParams } from '@/api/list';
 import { Pagination } from '@/types/global';
 import type { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
@@ -145,6 +144,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import {deleteUserById, queryUser, resetPwd, userParams, userResponse} from "@/api/blog/user";
 import {Message} from "@arco-design/web-vue";
 import {deleteTagById, queryType, typeListRes, Types} from "@/api/blog/type";
+import {queryTimeLine, TimeLine} from "@/api/blog/timeLine";
 
 
 type Column = TableColumnData & { checked?: true };
@@ -156,7 +156,7 @@ const generateFormModel = () => {
 };
 const { loading, setLoading } = useLoading(true);
 const { t } = useI18n();
-const renderData = ref<Types[]>([]);
+const renderData = ref<TimeLine[]>([]);
 const formModel = ref(generateFormModel());
 const cloneColumns = ref<Column[]>([]);
 const showColumns = ref<Column[]>([]);
@@ -186,9 +186,19 @@ const columns = computed<TableColumnData[]>(() => [
     slotName: 'index',
   },
   {
-    title: t('标签名'),
-    dataIndex: 'tagName',
-    slotName: 'tagName',
+    title: t('模块名'),
+    dataIndex: 'moduleName',
+    slotName: 'moduleName',
+  },
+  {
+    title: t('状态'),
+    dataIndex: 'moduleType',
+    slotName: 'moduleType',
+  },
+  {
+    title: t('更新时间'),
+    dataIndex: 'updateTime',
+    slotName: 'updateTime',
   },
   {
     title: t('创建时间'),
@@ -208,7 +218,7 @@ const fetchData = async (
 ) => {
   setLoading(true);
   try {
-    const { data } = await queryType(params);
+    const { data } = await queryTimeLine(params);
     renderData.value = data.records;
     pagination.current = params.current;
     pagination.total = data.total;

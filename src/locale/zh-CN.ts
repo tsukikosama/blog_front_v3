@@ -51,6 +51,8 @@ export default {
   'menu.blog.edit': '博客编辑',
   'menu.type': '标签',
   'menu.type.list': '标签列表',
+  'menu.timeLine': '时间线',
+  'menu.timeLine.list': '时间线列表',
   ...localeSettings,
   ...localeMessageBox,
   ...localeLogin,
