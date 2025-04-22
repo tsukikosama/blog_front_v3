@@ -18,7 +18,7 @@ const DASHBOARD: AppRouteRecordRaw = {
             name: 'bloglist',
             component: () => import('@/views/blog/index.vue'),
             meta: {
-                locale: 'menu.blog.bloglist',
+                locale: 'menu.blog.list',
                 requiresAuth: true,
                 roles: ['*'],
             },
@@ -28,7 +28,7 @@ const DASHBOARD: AppRouteRecordRaw = {
             name: 'blogedit',
             component: () => import('@/views/blog/add-or-update.vue'),
             meta: {
-                locale: 'menu.blog.blogedit',
+                locale: 'menu.blog.edit',
                 requiresAuth: true,
                 roles: ['*'],
             },

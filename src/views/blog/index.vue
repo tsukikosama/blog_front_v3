@@ -39,10 +39,12 @@
                 >
                   <a-select
                       v-model="formModel.userType"
-                      :options="contentTypeOptions"
+                      :options="TypeList"
+                      :field-names="fieldNames"
                       placeholder="请输入用户内容"
                       allow-clear
                   />
+
                 </a-form-item>
               </a-col>
               <a-col :span="8">
@@ -143,9 +145,16 @@
           @page-change="onPageChange"
           :row-selection="rowSelection"
           v-model:selectedKeys="selectedKeys"
+          :scroll="{x: 2000}"
+          :scrollbar="true"
       >
         <template #index="{ rowIndex }">
           {{ rowIndex + 1 + (pagination.current - 1) * pagination.pageSize }}
+        </template>
+        <template #tagId="{ record }">
+         <a-space>
+           <a-tag v-for="(item,index) in getTagName(record.tagId)" color="#168cff" :key="index">{{ item }}</a-tag>
+         </a-space>
         </template>
         <template #picture="{ record }">
           <a-space>
@@ -173,6 +182,10 @@
             </a-avatar>
           </a-space>
         </template>
+
+        <template #createDate="{ record }">
+          {{ record.createDate ? record.createDate.substring(0, 10) : '' }}
+        </template>
         <template #filterType="{ record }">
           {{ $t(`searchTable.form.filterType.${record.filterType}`) }}
         </template>
@@ -186,6 +199,9 @@
           <a-button  size="small" type="text" @click="addOrUpdate(record.id)">
             编辑
           </a-button>
+          <a-button  size="small" type="text" @click="viewReview(record.id)">
+            查看评论
+          </a-button>
         </template>
       </a-table>
     </a-card>
@@ -195,6 +211,11 @@
         @success="fetchData()"
     >
     </form-modal>
+    <ReviewFrom :id="viewTableVisible.id"
+    v-model:visible="viewTableVisible.visible"
+    @success="fetchData()">
+
+    </ReviewFrom>
   </div>
 
 </template>
@@ -211,6 +232,8 @@ import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
 import {Blog, blogParams, queryBlog} from "@/api/blog/blog";
 import {useRouter} from "vue-router";
+import ReviewFrom from "@/views/blog/review_from.vue";
+import {getTypeList, Types} from "@/api/blog/type";
 
 type SizeProps = 'mini' | 'small' | 'medium' | 'large';
 type Column = TableColumnData & { checked?: true };
@@ -223,6 +246,7 @@ const generateFormModel = () => {
     userType: '',
   };
 };
+const fieldNames = {value: 'id', label: 'tagName'}
 const { loading, setLoading } = useLoading(true);
 const { t } = useI18n();
 const renderData = ref<Blog[]>([]);
@@ -272,22 +296,25 @@ const columns = computed<TableColumnData[]>(() => [
     title: t('searchTable.columns.index'),
     dataIndex: 'index',
     slotName: 'index',
+    width:50,
   },
   {
     title: t('标题'),
     dataIndex: 'title',
     slotName: 'title',
+    width:100,
   },
   {
     title: t('首图'),
     dataIndex: 'picture',
     slotName: 'picture',
+    width:100,
   },
   {
     title: t('内容'),
     dataIndex: 'content',
     slotName: 'content',
-    width:200,
+    width:150,
     ellipsis: true,
     tooltip: true
   },
@@ -295,48 +322,51 @@ const columns = computed<TableColumnData[]>(() => [
     title: t('发布日期'),
     dataIndex: 'createDate',
     slotName: 'createDate',
+    width:120
   },
   {
     title: t('标签'),
     dataIndex: 'tagId',
     slotName: 'tagId',
+    width:200
   },
   {
     title: t('流量次数'),
     dataIndex: 'visit',
     slotName: 'visit',
+    width:100
   },
   {
-    title: t('用户名'),
+    title: t('发布者'),
     dataIndex: 'nickname',
     slotName: 'nickname',
+    width:100
   },
   {
     title: t('用户头像'),
     dataIndex: 'avatar',
     slotName: 'avatar',
+    width:100
   },
   {
     title: t('searchTable.columns.operations'),
     dataIndex: 'operations',
     slotName: 'operations',
+    width:150,
+    fixed: 'right',
   },
 ]);
-const contentTypeOptions = computed<SelectOptionData[]>(() => [
-  {
-    label: "会员",
-    value: '1',
-  },
-  {
-    label: "普通用户",
-    value: '0',
-  },
 
-]);
-console.log(router.getRoutes());
+
+const TypeList = ref<Types[]>([])
+const initType =async () => {
+  const res = await getTypeList();
+  TypeList.value = res.data
+}
+
 
 const fetchData = async (
-    params: blogParams = { current: 1, pageSize: 20 }
+    params: blogParams = { current: 1, pageSize: 10 }
 ) => {
   setLoading(true);
   try {
@@ -350,8 +380,10 @@ const fetchData = async (
   } finally {
     setLoading(false);
   }
+  initType()
 };
 
+console.log(TypeList.value)
 const search = () => {
   fetchData({
     ...basePagination,
@@ -372,6 +404,10 @@ const addOrUpdate = (id?:string) => {
   router.push({name:'blogedit',params:{id}});
 }
 
+const getTagName = (ids : number[]) => {
+  if (!ids) return []
+  return TypeList.value.filter(tag => ids.includes(tag.id as number)).map(tag => tag.tagName);
+}
 
 watch(
     () => columns.value,
@@ -385,6 +421,14 @@ watch(
     { deep: true, immediate: true }
 );
 
+const viewTableVisible = reactive({
+  visible: false,
+  id: '',
+});
+const viewReview = (blogId : string) => {
+  viewTableVisible.visible = true
+  viewTableVisible.id = blogId
+}
 </script>
 
 

@@ -33,3 +33,7 @@ export function queryTimeLine(params: timeLineParams) {
         },
     });
 }
+
+export function deleteModules(ids : number[]){
+    return axios.post('/admin/timeline/delete',ids)
+}

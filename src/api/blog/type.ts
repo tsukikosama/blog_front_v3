@@ -16,7 +16,7 @@ export interface typeParams {
     current: number;
     pageSize: number;
 }
-export function list() {
+export function getTypeList() {
     return axios.get<Types[]>('/admin/type/list', {
         paramsSerializer: (obj) => {
             return qs.stringify(obj);

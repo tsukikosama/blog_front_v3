@@ -51,6 +51,5 @@ export function updateBlog(param : saveBlog){
 }
 
 export function getBlogById(id:string){
-    console.log(id)
     return axios.get<Blog>(`/admin/blog/${id}`)
 }

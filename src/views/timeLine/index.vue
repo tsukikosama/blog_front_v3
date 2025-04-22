@@ -106,7 +106,10 @@
         <template #filterType="{ record }">
           {{ $t(`searchTable.form.filterType.${record.filterType}`) }}
         </template>
-
+        <template #moduleType="{ record }">
+          <a-tag color="#165dff" v-if="record.moduleType == 1">完成</a-tag>
+          <a-tag color="#ffb400" v-else>开发中</a-tag>
+        </template>
         <template #status="{ record }">
           <span v-if="record.status === 'offline'" class="circle"></span>
           <span v-else class="circle pass"></span>
@@ -144,7 +147,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import {deleteUserById, queryUser, resetPwd, userParams, userResponse} from "@/api/blog/user";
 import {Message} from "@arco-design/web-vue";
 import {deleteTagById, queryType, typeListRes, Types} from "@/api/blog/type";
-import {queryTimeLine, TimeLine} from "@/api/blog/timeLine";
+import {deleteModules, queryTimeLine, TimeLine} from "@/api/blog/timeLine";
 
 
 type Column = TableColumnData & { checked?: true };
@@ -246,7 +249,7 @@ const reset = () => {
 
 const deleteTag = async (ids:number) => {
     console.log(ids)
-   await deleteTagById([ids]);
+   await deleteModules([ids]);
 
   Message.success("删除成功");
   search()

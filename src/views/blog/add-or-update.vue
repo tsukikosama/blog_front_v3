@@ -83,12 +83,10 @@
 
 <script setup lang="ts">
 import {onMounted, ref, watch} from 'vue'
-import {list, Types} from "@/api/blog/type";
+import {getTypeList, Types} from "@/api/blog/type";
 import {getBlogById, saveBlog, updateBlog} from "@/api/blog/blog";
 import {Message} from "@arco-design/web-vue";
 import {useRoute, useRouter} from "vue-router";
-
-console.log("进入博客编辑页")
 
 const text = ref("")
 
@@ -106,7 +104,7 @@ const formModel = ref(generateFormModel());
 
 const tagList = ref<Types[]>([] as Types[])
 const getType = async () => {
-  const { data } = await list()
+  const { data } = await getTypeList()
   tagList.value = data
 }
 getType()
@@ -125,7 +123,6 @@ const submit = () => {
 
 const handleUploadSuccess = (file: any) => {
   formModel.value.picture = file?.response.data
-  Message.info("上传成功")
 };
 const route = useRoute()
 // 修改 fetchData 接口
@@ -143,7 +140,7 @@ const fetchData = async (id: string) => {
     const s = data.tagId?.split(',') || []
     const results = tagList.value
         .filter(tag => s.includes(tag.id?.toString()))
-        .map(tag => tag.id); // 👈 只返回 id 列表
+        .map(tag => tag.id);
     formModel.value.tagId = results
   }
 };
