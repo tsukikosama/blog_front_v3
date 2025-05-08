@@ -34,14 +34,14 @@
               </a-col>
               <a-col :span="8">
                 <a-form-item
-                    field="userType"
-                    label="用户类型"
+                    field="type"
+                    label="标签类型"
                 >
                   <a-select
-                      v-model="formModel.userType"
+                      v-model="formModel.type"
                       :options="TypeList"
                       :field-names="fieldNames"
-                      placeholder="请输入用户内容"
+                      placeholder="请选择标签"
                       allow-clear
                   />
 
@@ -55,7 +55,20 @@
                   <a-select
                       v-model="formModel.ban"
                       :options="userBanStaatus"
-                      placeholder="请输入用户内容"
+                      placeholder="请输入用户名"
+                      allow-clear
+                  />
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item
+                    field="ban"
+                    label="时间"
+                >
+                  <a-select
+                      v-model="formModel.ban"
+                      :options="userBanStaatus"
+                      placeholder="请输入用户名"
                       allow-clear
                   />
                 </a-form-item>
@@ -201,6 +214,9 @@
           </a-button>
           <a-button  size="small" type="text" @click="viewReview(record.id)">
             查看评论
+          </a-button>
+          <a-button  size="small" type="text" @click="deleteBlog(record.id)">
+            删除
           </a-button>
         </template>
       </a-table>
@@ -404,6 +420,10 @@ const addOrUpdate = (id?:string) => {
   router.push({name:'blogedit',params:{id}});
 }
 
+const deleteBlog = (ids:number | number[]) => {
+  const idList: number[] = Array.isArray(ids) ? ids : [ids];
+  deleteBlog(idList)
+}
 const getTagName = (ids : number[]) => {
   if (!ids) return []
   return TypeList.value.filter(tag => ids.includes(tag.id as number)).map(tag => tag.tagName);

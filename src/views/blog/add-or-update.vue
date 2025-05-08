@@ -92,7 +92,7 @@ const text = ref("")
 
 const generateFormModel = () => {
   return {
-    id:'',
+    id:null,
     title: '',
     picture: '',
     tagId: [],
@@ -112,7 +112,7 @@ const router = useRouter();
 const fieldNames = {value: 'id', label: 'tagName'}
 const submit = () => {
   //  判断formModel的id是否值
-  if (formModel.value.id != null){
+  if (formModel.value.id != null ){
     updateBlog(formModel.value)
   }else{
     saveBlog(formModel.value)
@@ -138,6 +138,7 @@ const fetchData = async (id: string) => {
     Object.assign(formModel.value, data);
     //  获取到的data是字符串形式 需要进行切割
     const s = data.tagId?.split(',') || []
+    console.log(s,"sss")
     const results = tagList.value
         .filter(tag => s.includes(tag.id?.toString()))
         .map(tag => tag.id);
