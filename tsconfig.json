@@ -3,7 +3,9 @@
     "target": "ES2020",
     "module": "ES2020",
     "moduleResolution": "node",
-    "strict": true,
+    "strict": false,
+    "noImplicitAny": false,                 // 允许隐式 any
+    "suppressImplicitAnyIndexErrors": true, // 关闭索引隐式 any 报错
     "jsx": "preserve",
     "sourceMap": true,
     "resolveJsonModule": true,

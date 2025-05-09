@@ -54,6 +54,6 @@ export function getBlogById(id:string){
     return axios.get<Blog>(`/admin/blog/${id}`)
 }
 
-export function deleteBlog(ids:number[]){
+export function deleteBlogs(ids:number[]){
     return axios.post('/admin/blog/delete',ids)
 }

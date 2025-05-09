@@ -81,7 +81,6 @@
           :columns="(cloneColumns as TableColumnData[])"
           :data="renderData"
           :bordered="false"
-          :size="size"
           @page-change="onPageChange"
           :row-selection="rowSelection"
           v-model:selectedKeys="selectedKeys"

@@ -112,7 +112,10 @@
                 </a-button>
               </template>
             </a-upload>
-
+            <a-button type="primary"
+                      @click="batchDelete()">
+              批量删除
+            </a-button>
           </a-space>
         </a-col>
         <a-col
@@ -215,9 +218,12 @@
           <a-button  size="small" type="text" @click="viewReview(record.id)">
             查看评论
           </a-button>
-          <a-button  size="small" type="text" @click="deleteBlog(record.id)">
-            删除
-          </a-button>
+          <a-popconfirm content="确定要删除吗?"  @ok="deleteBlog(record.id)">
+            <a-button  size="small" type="text" >
+              删除
+            </a-button>
+          </a-popconfirm>
+
         </template>
       </a-table>
     </a-card>
@@ -246,10 +252,11 @@ import { Pagination } from '@/types/global';
 import type { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
 import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
-import {Blog, blogParams, queryBlog} from "@/api/blog/blog";
+import {Blog, blogParams, deleteBlogs, queryBlog} from "@/api/blog/blog";
 import {useRouter} from "vue-router";
 import ReviewFrom from "@/views/blog/review_from.vue";
 import {getTypeList, Types} from "@/api/blog/type";
+import {Message} from "@arco-design/web-vue";
 
 type SizeProps = 'mini' | 'small' | 'medium' | 'large';
 type Column = TableColumnData & { checked?: true };
@@ -380,6 +387,13 @@ const initType =async () => {
   TypeList.value = res.data
 }
 
+const batchDelete = () => {
+   if (selectedKeys.value.length===0){
+     Message.info("请选择需要删除的博客")
+     return
+   }
+   deleteBlogs(selectedKeys.value)
+}
 
 const fetchData = async (
     params: blogParams = { current: 1, pageSize: 10 }
@@ -399,7 +413,6 @@ const fetchData = async (
   initType()
 };
 
-console.log(TypeList.value)
 const search = () => {
   fetchData({
     ...basePagination,
@@ -420,9 +433,12 @@ const addOrUpdate = (id?:string) => {
   router.push({name:'blogedit',params:{id}});
 }
 
-const deleteBlog = (ids:number | number[]) => {
+const deleteBlog = async (ids:number | number[]) => {
+  console.log("wwwwwwwwww")
   const idList: number[] = Array.isArray(ids) ? ids : [ids];
-  deleteBlog(idList)
+  const { data } = await deleteBlogs(idList)
+  Message.info(data)
+  search()
 }
 const getTagName = (ids : number[]) => {
   if (!ids) return []
