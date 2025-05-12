@@ -14,13 +14,38 @@
               <a-col :span="8">
                 <a-form-item
                     field="tagName"
-                    label="标签名"
+                    label="模块名"
                 >
                   <a-input
                       v-model="formModel.tagName"
                       placeholder="请输入标签名"
                       allow-clear
                   />
+                </a-form-item>
+              </a-col>
+
+              <a-col :span="8">
+                <a-form-item
+                    field="status"
+                    label="状态"
+                >
+                  <a-input
+                      v-model="formModel.status"
+                      placeholder="请选择状态"
+                      allow-clear
+                  />
+                </a-form-item>
+              </a-col>
+
+              <a-col :span="8">
+                  <a-form-item
+                      field="createTime"
+                      label="时间"
+                  >
+                    <a-range-picker
+                        @select="onSelect"
+                        style="width: 254px; marginBottom: 20px;"
+                    />
                 </a-form-item>
               </a-col>
             </a-row>
@@ -148,18 +173,22 @@ import {deleteUserById, queryUser, resetPwd, userParams, userResponse} from "@/a
 import {Message} from "@arco-design/web-vue";
 import {deleteTagById, queryType, typeListRes, Types} from "@/api/blog/type";
 import {deleteModules, queryTimeLine, TimeLine} from "@/api/blog/timeLine";
+import {friendLink, queryBlog} from "@/api/blog/friendLink";
 
 
 type Column = TableColumnData & { checked?: true };
 
 const generateFormModel = () => {
   return {
-    tagName:''
+    tagName:'',
+    status:'',
+    startTime:'',
+    endTime:''
   };
 };
 const { loading, setLoading } = useLoading(true);
 const { t } = useI18n();
-const renderData = ref<TimeLine[]>([]);
+const renderData = ref<friendLink[]>([]);
 const formModel = ref(generateFormModel());
 const cloneColumns = ref<Column[]>([]);
 const showColumns = ref<Column[]>([]);
@@ -221,7 +250,7 @@ const fetchData = async (
 ) => {
   setLoading(true);
   try {
-    const { data } = await queryTimeLine(params);
+    const { data } = await queryBlog(params);
     renderData.value = data.records;
     pagination.current = params.current;
     pagination.total = data.total;
@@ -266,7 +295,10 @@ watch(
     },
     { deep: true, immediate: true }
 );
-
+const onSelect = (dateString: string[]) => {
+  formModel.value.startTime = dateString[0] as string
+  formModel.value.endTime = dateString[1] as string
+}
 </script>
 
 

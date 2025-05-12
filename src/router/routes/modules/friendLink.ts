@@ -3,11 +3,11 @@ import { AppRouteRecordRaw } from '../types';
 
 
 const DASHBOARD: AppRouteRecordRaw = {
-    path: '/type',
-    name: 'type',
+    path: '/friendLink',
+    name: 'friendLink',
     component: DEFAULT_LAYOUT,
     meta: {
-        locale: 'menu.type',
+        locale: 'menu.friendLink',
         requiresAuth: true,
         icon: 'icon-dashboard',
         order: 10,
@@ -15,10 +15,10 @@ const DASHBOARD: AppRouteRecordRaw = {
     children: [
         {
             path: 'list',
-            name: 'typeList',
-            component: () => import('@/views/type/index.vue'),
+            name: 'friendLinkList',
+            component: () => import('@/views/friendLink/index.vue'),
             meta: {
-                locale: 'menu.type.list',
+                locale: 'menu.friendLink.list',
                 requiresAuth: true,
                 roles: ['*'],
             },

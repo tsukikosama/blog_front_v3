@@ -11,6 +11,7 @@ export interface Blog {
     simpleTitle?: string; // 简要标题
     userId?: number; // 用户 ID
     state?: number; // 状态
+
 }
 export interface saveBlog {
     id?:string,

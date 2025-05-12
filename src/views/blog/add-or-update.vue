@@ -138,7 +138,6 @@ const fetchData = async (id: string) => {
     Object.assign(formModel.value, data);
     //  获取到的data是字符串形式 需要进行切割
     const s = data.tagId?.split(',') || []
-    console.log(s,"sss")
     const results = tagList.value
         .filter(tag => s.includes(tag.id?.toString()))
         .map(tag => tag.id);

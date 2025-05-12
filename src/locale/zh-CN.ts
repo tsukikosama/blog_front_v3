@@ -53,6 +53,8 @@ export default {
   'menu.type.list': '标签列表',
   'menu.timeLine': '时间线',
   'menu.timeLine.list': '时间线列表',
+  'menu.friendLink': '友链',
+  'menu.friendLink.list': '友链列表',
   ...localeSettings,
   ...localeMessageBox,
   ...localeLogin,

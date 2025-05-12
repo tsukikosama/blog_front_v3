@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <Breadcrumb :items="['用户', '用户列表']" />
-    <a-card class="general-card" :title="$t('用户列表')">
+    <Breadcrumb :items="['标签', '标签列表']" />
+    <a-card class="general-card" :title="$t('标签列表')">
       <a-row>
         <a-col :flex="1">
           <a-form
@@ -13,49 +13,39 @@
             <a-row :gutter="16">
               <a-col :span="8">
                 <a-form-item
-                    field="nickname"
-                    label="昵称"
+                    field="tagName"
+                    label="模块名"
                 >
                   <a-input
-                      v-model="formModel.nickname"
-                      placeholder="请输入昵称"
+                      v-model="formModel.tagName"
+                      placeholder="请输入标签名"
                       allow-clear
                   />
                 </a-form-item>
               </a-col>
+
               <a-col :span="8">
-                <a-form-item field="email" label="邮箱">
+                <a-form-item
+                    field="status"
+                    label="状态"
+                >
                   <a-input
-                      v-model="formModel.email"
-                      placeholder="请输入邮箱"
+                      v-model="formModel.status"
+                      placeholder="请选择状态"
                       allow-clear
                   />
                 </a-form-item>
               </a-col>
+
               <a-col :span="8">
-                <a-form-item
-                    field="userType"
-                    label="用户类型"
-                >
-                  <a-select
-                      v-model="formModel.userType"
-                      :options="contentTypeOptions"
-                      placeholder="请输入用户内容"
-                      allow-clear
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="8">
-                <a-form-item
-                    field="ban"
-                    label="用户状态"
-                >
-                  <a-select
-                      v-model="formModel.ban"
-                      :options="userBanStatus"
-                      placeholder="请输入用户内容"
-                      allow-clear
-                  />
+                  <a-form-item
+                      field="createTime"
+                      label="时间"
+                  >
+                    <a-range-picker
+                        @select="onSelect"
+                        style="width: 254px; marginBottom: 20px;"
+                    />
                 </a-form-item>
               </a-col>
             </a-row>
@@ -84,7 +74,7 @@
         <a-col :span="12">
           <a-space>
             <a-button type="primary"
-                @click="
+                      @click="
                 () => {
                   formModalVisible.visible = true;
                   formModalVisible.id = '';
@@ -94,21 +84,6 @@
                 <icon-plus />
               </template>
               {{ $t('searchTable.operation.create') }}
-            </a-button>
-            <a-upload action="/">
-              <template #upload-button>
-                <a-button>
-                  {{ $t('searchTable.operation.import') }}
-                </a-button>
-              </template>
-            </a-upload>
-            <a-button type="primary" @click="() => {
-                resetPassword(selectedKeys)
-            }">
-              <template #icon>
-                <icon-command />
-              </template>
-             重置密码
             </a-button>
           </a-space>
         </a-col>
@@ -135,7 +110,6 @@
           @page-change="onPageChange"
           :row-selection="rowSelection"
           v-model:selectedKeys="selectedKeys"
-          @selection-change="onSelectionChange"
       >
         <template #index="{ rowIndex }">
           {{ rowIndex + 1 + (pagination.current - 1) * pagination.pageSize }}
@@ -154,41 +128,35 @@
             </a-avatar>
           </a-space>
         </template>
-        <template #filterType="{ record }">
-          {{ $t(`searchTable.form.filterType.${record.filterType}`) }}
-        </template>
 
-        <template #status="{ record }">
-          <span v-if="record.status === 'offline'" class="circle"></span>
-          <span v-else class="circle pass"></span>
-          {{ $t(`searchTable.form.status.${record.status}`) }}
+        <template #webAccess="{ record }">
+          <span v-if="record.webAccess == '1'" class="circle">有效</span>
+          <span v-else class="circle">失效</span>
         </template>
         <template #operations="{ record }">
-
-          <a-button  size="small" type="text" @click="deleteUser(record.id)">
+          <a-button  size="small" type="text" @click="deleteTag(record.id)">
+            更新
+          </a-button>
+          <a-button  size="small" type="text" @click="deleteTag(record.id)">
             {{ $t('searchTable.columns.operations.delete') }}
           </a-button>
-          <a-button  size="small" type="text">
-            封禁
-          </a-button>
+
         </template>
       </a-table>
     </a-card>
-    <form-modal
-        :id="formModalVisible.id"
-        v-model:visible="formModalVisible.visible"
-        @success="fetchData()"
-    >
-    </form-modal>
+<!--    <form-modal-->
+<!--        :id="formModalVisible.id"-->
+<!--        v-model:visible="formModalVisible.visible"-->
+<!--        @success="fetchData()"-->
+<!--    >-->
+<!--    </form-modal>-->
   </div>
-
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import useLoading from '@/hooks/loading';
-import FormModal from '@/views/blogUser/form-model.vue';
 import { PolicyParams } from '@/api/list';
 import { Pagination } from '@/types/global';
 import type { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
@@ -196,24 +164,27 @@ import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
 import {deleteUserById, queryUser, resetPwd, userParams, userResponse} from "@/api/blog/user";
 import {Message} from "@arco-design/web-vue";
+import {deleteTagById, queryType, typeListRes, Types} from "@/api/blog/type";
+import {deleteModules, queryTimeLine, TimeLine} from "@/api/blog/timeLine";
+import {queryFriendLink} from "@/api/blog/friendLink";
+
 
 type Column = TableColumnData & { checked?: true };
 
 const generateFormModel = () => {
   return {
-    nickname: '',
-    email: '',
-    ban: '',
-    userType: '',
+    tagName:'',
+    status:'',
+    startTime:'',
+    endTime:''
   };
 };
 const { loading, setLoading } = useLoading(true);
 const { t } = useI18n();
-const renderData = ref<userResponse[]>([]);
+const renderData = ref<TimeLine[]>([]);
 const formModel = ref(generateFormModel());
 const cloneColumns = ref<Column[]>([]);
 const showColumns = ref<Column[]>([]);
-
 
 
 const formModalVisible = reactive({
@@ -222,7 +193,7 @@ const formModalVisible = reactive({
 });
 const basePagination: Pagination = {
   current: 1,
-  pageSize: 20,
+  pageSize: 10,
 };
 const pagination = reactive({
   ...basePagination,
@@ -238,88 +209,51 @@ const columns = computed<TableColumnData[]>(() => [
     title: t('searchTable.columns.index'),
     dataIndex: 'index',
     slotName: 'index',
-    width: 50,
   },
   {
-    title: t('账号'),
-    dataIndex: 'username',
-    slotName: 'username',
+    title: t('名称'),
+    dataIndex: 'webName',
+    slotName: 'webName',
   },
   {
-    title: t('头像'),
-    dataIndex: 'avatar',
-    slotName: 'avatar',
+    title: t('描述'),
+    dataIndex: 'webDescript',
+    slotName: 'webDescript',
   },
-  // {
-  //   title: t('用户类型'),
-  //   dataIndex: 'userType',
-  //   slotName: 'userType',
-  // },
+  {
+    title: t('图片'),
+    dataIndex: 'webImg',
+    slotName: 'webImg',
+  },
+  {
+    title: t('网址'),
+    dataIndex: 'webUrl',
+    slotName: 'webUrl',
+  },
+  {
+    title: t('是否有效'),
+    dataIndex: 'webAccess',
+    slotName: 'webAccess',
+    width:100
+  },
   {
     title: t('邮箱'),
-    dataIndex: 'email',
-    slotName: 'email',
+    dataIndex: 'webEmail',
+    slotName: 'webEmail',
   },
-  {
-    title: t('个人简介'),
-    dataIndex: 'about',
-    slotName: 'about',
-  },
-  {
-    title: t('昵称'),
-    dataIndex: 'nickname',
-    slotName: 'nickname',
-  },
-  // {
-  //   title: t('封禁状态'),
-  //   dataIndex: 'ban',
-  //   slotName: 'ban',
-  // },
-  {
-    title: t('注册时间'),
-    dataIndex: 'createTime',
-    slotName: 'createTime',
-  },
-  // {
-  //   title: t('更新时间'),
-  //   dataIndex: 'updateTime',
-  //   slotName: 'updateTime',
-  // },
   {
     title: t('searchTable.columns.operations'),
     dataIndex: 'operations',
     slotName: 'operations',
   },
 ]);
-const contentTypeOptions = computed<SelectOptionData[]>(() => [
-  {
-    label: "会员",
-    value: '1',
-  },
-  {
-    label: "普通用户",
-    value: '0',
-  },
-
-]);
-const userBanStatus = computed<SelectOptionData[]>(() => [
-  {
-    label: "禁用",
-    value: '0',
-  },
-  {
-    label: "正常",
-    value: '1',
-  },
-
-]);
 
 const fetchData = async (
-    params: userParams = { current: 1, pageSize: 20 }
+    params: userParams = { current: 1, pageSize: 10 }
 ) => {
   setLoading(true);
   try {
-    const { data } = await queryUser(params);
+    const { data } = await queryFriendLink(params);
     renderData.value = data.records;
     pagination.current = params.current;
     pagination.total = data.total;
@@ -341,17 +275,17 @@ const onPageChange = (current: number) => {
   fetchData({ ...basePagination, current });
 };
 
-
 const reset = () => {
   formModel.value = generateFormModel();
 };
 
-const resetPassword = async (ids:number[]) => {
-     const { data } =  await resetPwd(ids);
+const deleteTag = async (ids:number) => {
+    console.log(ids)
+   await deleteModules([ids]);
 
-     Message.success(data);
+  Message.success("删除成功");
+  search()
 }
-
 
 watch(
     () => columns.value,
@@ -364,15 +298,10 @@ watch(
     },
     { deep: true, immediate: true }
 );
-
-const deleteUser =async (id:number) => {
-  const {data} = await deleteUserById([id])
-  Message.success(data);
-  search()
+const onSelect = (dateString: string[]) => {
+  formModel.value.startTime = dateString[0] as string
+  formModel.value.endTime = dateString[1] as string
 }
-const onSelectionChange = (keys: number[]) => {
-  console.log('当前选中行 ID:', keys);
-};
 </script>
 
 
