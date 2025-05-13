@@ -7,29 +7,39 @@
       @before-ok="handleSubmit"
   >
     <a-form ref="formRef" :model="form">
-      <a-form-item label="账号" field="username" required :rules="{ required: true, message: '请输入账号' }">
+      <a-form-item label="名称" field="webName" required :rules="{ required: true, message: '请输入账号' }">
         <a-input
-            v-model="form.username"
-            placeholder="请输入账号"
+            v-model="form.webName"
+            placeholder="请输入名称"
             allow-clear
         />
       </a-form-item>
-      <a-form-item label="密码" field="password" required :rules="{ required: true, message: '请输入密码' }">
+      <a-form-item label="描述" field="webDescript" required :rules="{ required: true, message: '请输入密码' }">
         <a-input
-            v-model="form.password"
-            placeholder="请输入密码"
+            v-model="form.webDescript"
+            placeholder="请输入描述"
             type="password"
             allow-clear
         />
       </a-form-item>
-      <a-form-item label="邮箱" field="email" >
+      <a-form-item label="网址" field="webUrl"  required :rules="{
+        type:'url'
+      }">
+        <a-input
+            v-model="form.webUrl"
+            placeholder="请输入网址"
+            allow-clear
+        />
+      </a-form-item>
+      <a-form-item label="邮箱" field="email" :rules="{
+        type:'email'
+      }">
         <a-input
             v-model="form.email"
             placeholder="请输入邮箱"
             allow-clear
         />
       </a-form-item>
-
     </a-form>
   </a-modal>
 </template>
@@ -56,9 +66,11 @@ const formRef = ref<FormInstance>();
 const { loading, setLoading } = useLoading();
 const form = reactive<any>({
   id: '',
-  username: '',
-  password: '',
-  email:'',
+  webUrl: '',
+  webName: '',
+  webDescript:'',
+  webImg:'',
+  webEmail:''
 
 });
 const handleSubmit = async (done: (closed: boolean) => void) => {

@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <Breadcrumb :items="['标签', '标签列表']" />
-    <a-card class="general-card" :title="$t('标签列表')">
+    <Breadcrumb :items="['友链', '友链列表']" />
+    <a-card class="general-card" :title="$t('友链列表')">
       <a-row>
         <a-col :flex="1">
           <a-form
@@ -115,6 +115,9 @@
           {{ rowIndex + 1 + (pagination.current - 1) * pagination.pageSize }}
         </template>
 
+        <template #webUrl="{ record }">
+          <a-button type="text" :href="record.webUrl" >{{ record.webUrl}}</a-button>
+        </template>
         <template #avatar="{ record }">
           <a-space>
             <a-avatar
@@ -130,26 +133,22 @@
         </template>
 
         <template #webAccess="{ record }">
-          <span v-if="record.webAccess == '1'" class="circle">有效</span>
-          <span v-else class="circle">失效</span>
+          <a-badge v-if="record.webAccess == 1" status="success" text="有效" />
+          <a-badge v-else status="danger" text="失效" />
         </template>
         <template #operations="{ record }">
-          <a-button  size="small" type="text" @click="deleteTag(record.id)">
+          <a-button  size="small" type="text" @click="update(record.id)">
             更新
           </a-button>
-          <a-button  size="small" type="text" @click="deleteTag(record.id)">
-            {{ $t('searchTable.columns.operations.delete') }}
-          </a-button>
-
         </template>
       </a-table>
     </a-card>
-<!--    <form-modal-->
-<!--        :id="formModalVisible.id"-->
-<!--        v-model:visible="formModalVisible.visible"-->
-<!--        @success="fetchData()"-->
-<!--    >-->
-<!--    </form-modal>-->
+    <form-modal
+        :id="formModalVisible.id"
+        v-model:visible="formModalVisible.visible"
+        @success="fetchData()"
+    >
+    </form-modal>
   </div>
 </template>
 
@@ -158,15 +157,14 @@ import { computed, ref, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import useLoading from '@/hooks/loading';
 import { PolicyParams } from '@/api/list';
+import FormModal from '@/views/friendLink/add-or-update.vue';
 import { Pagination } from '@/types/global';
-import type { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
 import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
-import {deleteUserById, queryUser, resetPwd, userParams, userResponse} from "@/api/blog/user";
 import {Message} from "@arco-design/web-vue";
-import {deleteTagById, queryType, typeListRes, Types} from "@/api/blog/type";
-import {deleteModules, queryTimeLine, TimeLine} from "@/api/blog/timeLine";
-import {queryFriendLink} from "@/api/blog/friendLink";
+import {deleteModules, TimeLine} from "@/api/blog/timeLine";
+import {friendLink, friendLinkParams, queryFriendLink} from "@/api/blog/friendLink";
+import {update} from "lodash";
 
 
 type Column = TableColumnData & { checked?: true };
@@ -181,7 +179,7 @@ const generateFormModel = () => {
 };
 const { loading, setLoading } = useLoading(true);
 const { t } = useI18n();
-const renderData = ref<TimeLine[]>([]);
+const renderData = ref<friendLink[]>([]);
 const formModel = ref(generateFormModel());
 const cloneColumns = ref<Column[]>([]);
 const showColumns = ref<Column[]>([]);
@@ -221,11 +219,6 @@ const columns = computed<TableColumnData[]>(() => [
     slotName: 'webDescript',
   },
   {
-    title: t('图片'),
-    dataIndex: 'webImg',
-    slotName: 'webImg',
-  },
-  {
     title: t('网址'),
     dataIndex: 'webUrl',
     slotName: 'webUrl',
@@ -249,7 +242,7 @@ const columns = computed<TableColumnData[]>(() => [
 ]);
 
 const fetchData = async (
-    params: userParams = { current: 1, pageSize: 10 }
+    params: friendLinkParams = { current: 1, pageSize: 10 }
 ) => {
   setLoading(true);
   try {
