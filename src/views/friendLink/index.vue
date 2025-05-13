@@ -137,7 +137,10 @@
           <a-badge v-else status="danger" text="失效" />
         </template>
         <template #operations="{ record }">
-          <a-button  size="small" type="text" @click="update(record.id)">
+          <a-button  size="small" type="text" @click="() => {
+             formModalVisible.visible = true;
+             formModalVisible.id = record.id;
+          }">
             更新
           </a-button>
         </template>
@@ -162,9 +165,8 @@ import { Pagination } from '@/types/global';
 import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
 import {Message} from "@arco-design/web-vue";
-import {deleteModules, TimeLine} from "@/api/blog/timeLine";
+import {deleteModules} from "@/api/blog/timeLine";
 import {friendLink, friendLinkParams, queryFriendLink} from "@/api/blog/friendLink";
-import {update} from "lodash";
 
 
 type Column = TableColumnData & { checked?: true };
@@ -271,14 +273,6 @@ const onPageChange = (current: number) => {
 const reset = () => {
   formModel.value = generateFormModel();
 };
-
-const deleteTag = async (ids:number) => {
-    console.log(ids)
-   await deleteModules([ids]);
-
-  Message.success("删除成功");
-  search()
-}
 
 watch(
     () => columns.value,

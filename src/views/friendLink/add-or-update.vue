@@ -31,11 +31,12 @@
             allow-clear
         />
       </a-form-item>
-      <a-form-item label="邮箱" field="email" :rules="{
+      <a-form-item label="邮箱" field="webEmail" required :rules="{
+
         type:'email'
       }">
         <a-input
-            v-model="form.email"
+            v-model="form.webEmail"
             placeholder="请输入邮箱"
             allow-clear
         />
@@ -49,6 +50,8 @@ import { reactive, ref, watch } from 'vue';
 import { FormInstance, Message } from '@arco-design/web-vue';
 import useLoading from '@/hooks/loading';
 import {getUserInfoById, saveUser} from "@/api/blog/user";
+import {getFriendLinkById, saveFriendLink, updateFriendLink} from "@/api/blog/friendLink";
+import {update} from "lodash";
 
 
 const props = defineProps({
@@ -80,10 +83,10 @@ const handleSubmit = async (done: (closed: boolean) => void) => {
     try {
       if (props.id) {
         form.id = props.id;
-        await saveUser(form);
+        await updateFriendLink(form);
       } else {
         form.id = undefined;
-        await saveUser(form);
+        await saveFriendLink(form);
       }
       Message.success('操作成功');
       done(true);
@@ -98,7 +101,7 @@ const handleSubmit = async (done: (closed: boolean) => void) => {
   }
 };
 const getDetail = async (id: string) => {
-  const res = await getUserInfoById(id);
+  const res = await getFriendLinkById(id);
   Object.assign(form,res.data)
 };
 watch(

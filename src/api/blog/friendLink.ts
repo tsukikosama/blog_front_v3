@@ -1,5 +1,6 @@
 import axios from "axios";
 import qs from "query-string";
+import {userResponse} from "@/api/blog/user";
 
 export interface friendLink {
     /** 主键 */
@@ -45,6 +46,24 @@ export interface friendLinkParams {
 export function queryFriendLink(params: friendLinkParams) {
     return axios.get<friendLinkRes>('/admin/friendLink/page', {
         params,
+        paramsSerializer: (obj) => {
+            return qs.stringify(obj);
+        },
+    });
+}
+
+export function saveFriendLink(params: friendLink) {
+    return axios.post('/admin/friendLink/save',params);
+}
+export function updateFriendLink(params: friendLink) {
+    return axios.post('/admin/friendLink/update',params);
+}
+
+export function getFriendLinkById(id : string){
+    return axios.get<userResponse>('/admin/friendLink/detail',{
+        params: {
+            id,
+        },
         paramsSerializer: (obj) => {
             return qs.stringify(obj);
         },
