@@ -7,46 +7,39 @@
       @before-ok="handleSubmit"
   >
     <a-form ref="formRef" :model="form">
-      <a-form-item label="名称" field="webName" required :rules="{ required: true, message: '请输入账号' }">
+      <a-form-item label="记录对象" field="name" required :rules="{ required: true, message: '请输入账号' }">
         <a-input
-            v-model="form.webName"
-            placeholder="请输入名称"
+            v-model="form.name"
+            placeholder="请输入记录对象"
             allow-clear
         />
       </a-form-item>
-      <a-form-item label="描述" field="webDescript" required :rules="{ required: true, message: '请输入密码' }">
+      <a-form-item label="原因" field="cause" required :rules="{ required: true, message: '请输入原因' }">
+        <a-textarea
+            v-model="form.cause"
+            default-value="This is the contents of the textarea. This is the contents of the textarea. This is the contents of the textarea."
+            :auto-size="{
+    minRows:2,
+    maxRows:5
+  }" style="margin-top: 20px"/>
+      </a-form-item>
+      <a-form-item label="类型" field="type" required :rules="{ required: true, message: '请输入密码' }">
         <a-input
-            v-model="form.webDescript"
-            placeholder="请输入描述"
+            v-model="form.type"
+            placeholder="请输入原因"
             type="password"
             allow-clear
         />
       </a-form-item>
-      <a-form-item label="网址" field="webUrl"  required :rules="{
-        type:'url'
-      }">
-        <a-input
-            v-model="form.webUrl"
-            placeholder="请输入网址"
-            allow-clear
-        />
-      </a-form-item>
-      <a-form-item label="邮箱" field="webEmail" required :rules="{
-        type:'email'
-      }">
-        <a-input
-            v-model="form.webEmail"
-            placeholder="请输入邮箱"
-            allow-clear
-        />
-      </a-form-item>
+
+
     </a-form>
   </a-modal>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue';
-import { FormInstance, Message } from '@arco-design/web-vue';
+import {reactive, ref, watch} from 'vue';
+import {FormInstance, Message} from '@arco-design/web-vue';
 import useLoading from '@/hooks/loading';
 import {getFriendLinkById, saveFriendLink, updateFriendLink} from "@/api/blog/friendLink";
 
@@ -63,14 +56,12 @@ const props = defineProps({
 const emit = defineEmits(['success', 'update:visible']);
 const modalVisible = ref(false);
 const formRef = ref<FormInstance>();
-const { loading, setLoading } = useLoading();
+const {loading, setLoading} = useLoading();
 const form = reactive<any>({
   id: '',
-  webUrl: '',
-  webName: '',
-  webDescript:'',
-  webImg:'',
-  webEmail:''
+  name: '',
+  cause: '',
+  type: ''
 
 });
 const handleSubmit = async (done: (closed: boolean) => void) => {
@@ -99,7 +90,7 @@ const handleSubmit = async (done: (closed: boolean) => void) => {
 };
 const getDetail = async (id: string) => {
   const res = await getFriendLinkById(id);
-  Object.assign(form,res.data)
+  Object.assign(form, res.data)
 };
 watch(
     () => modalVisible.value,

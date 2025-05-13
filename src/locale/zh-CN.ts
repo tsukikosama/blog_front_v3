@@ -55,6 +55,8 @@ export default {
   'menu.timeLine.list': '时间线列表',
   'menu.friendLink': '友链',
   'menu.friendLink.list': '友链列表',
+  'menu.miraiNote': '未来日记',
+  'menu.miraiNote.list': '日记列表',
   ...localeSettings,
   ...localeMessageBox,
   ...localeLogin,

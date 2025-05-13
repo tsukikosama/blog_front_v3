@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <Breadcrumb :items="['友链', '友链列表']" />
-    <a-card class="general-card" :title="$t('友链列表')">
+    <Breadcrumb :items="['未来日记', '日记列表']" />
+    <a-card class="general-card" :title="$t('日记列表')">
       <a-row>
         <a-col :flex="1">
           <a-form
@@ -38,14 +38,14 @@
               </a-col>
 
               <a-col :span="8">
-                  <a-form-item
-                      field="createTime"
-                      label="时间"
-                  >
-                    <a-range-picker
-                        @select="onSelect"
-                        style="width: 254px; marginBottom: 20px;"
-                    />
+                <a-form-item
+                    field="createTime"
+                    label="时间"
+                >
+                  <a-range-picker
+                      @select="onSelect"
+                      style="width: 254px; marginBottom: 20px;"
+                  />
                 </a-form-item>
               </a-col>
             </a-row>
@@ -115,9 +115,6 @@
           {{ rowIndex + 1 + (pagination.current - 1) * pagination.pageSize }}
         </template>
 
-        <template #webUrl="{ record }">
-          <a-button type="text" :href="record.webUrl" >{{ record.webUrl}}</a-button>
-        </template>
         <template #avatar="{ record }">
           <a-space>
             <a-avatar
@@ -131,27 +128,35 @@
             </a-avatar>
           </a-space>
         </template>
-
-        <template #webAccess="{ record }">
-          <a-badge v-if="record.webAccess == 1" status="success" text="有效" />
-          <a-badge v-else status="danger" text="失效" />
+        <template #filterType="{ record }">
+          {{ $t(`searchTable.form.filterType.${record.filterType}`) }}
+        </template>
+        <template #moduleType="{ record }">
+          <a-tag color="#165dff" v-if="record.moduleType == 1">完成</a-tag>
+          <a-tag color="#ffb400" v-else>开发中</a-tag>
+        </template>
+        <template #status="{ record }">
+          <span v-if="record.status === 'offline'" class="circle"></span>
+          <span v-else class="circle pass"></span>
+          {{ $t(`searchTable.form.status.${record.status}`) }}
         </template>
         <template #operations="{ record }">
-          <a-button  size="small" type="text" @click="() => {
-             formModalVisible.visible = true;
-             formModalVisible.id = record.id;
-          }">
+          <a-button  size="small" type="text" @click="delete(record.id)">
             更新
           </a-button>
+          <a-button  size="small" type="text" @click="deleteItme(record.id)">
+            {{ $t('searchTable.columns.operations.delete') }}
+          </a-button>
+
         </template>
       </a-table>
     </a-card>
-    <form-modal
-        :id="formModalVisible.id"
-        v-model:visible="formModalVisible.visible"
-        @success="fetchData()"
-    >
-    </form-modal>
+        <form-modal
+            :id="formModalVisible.id"
+            v-model:visible="formModalVisible.visible"
+            @success="fetchData()"
+        >
+        </form-modal>
   </div>
 </template>
 
@@ -160,11 +165,14 @@ import { computed, ref, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import useLoading from '@/hooks/loading';
 import { PolicyParams } from '@/api/list';
-import FormModal from '@/views/friendLink/add-or-update.vue';
 import { Pagination } from '@/types/global';
 import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
-import {friendLink, friendLinkParams, queryFriendLink} from "@/api/blog/friendLink";
+import { userParams} from "@/api/blog/user";
+import {Message} from "@arco-design/web-vue";
+import FormModal from '@/views/miraiNote/add-or-update.vue';
+import {deleteModules} from "@/api/blog/timeLine";
+import {angryPig, queryAngryPig} from "@/api/blog/angryPig";
 
 
 type Column = TableColumnData & { checked?: true };
@@ -179,7 +187,7 @@ const generateFormModel = () => {
 };
 const { loading, setLoading } = useLoading(true);
 const { t } = useI18n();
-const renderData = ref<friendLink[]>([]);
+const renderData = ref<angryPig[]>([]);
 const formModel = ref(generateFormModel());
 const cloneColumns = ref<Column[]>([]);
 const showColumns = ref<Column[]>([]);
@@ -209,31 +217,26 @@ const columns = computed<TableColumnData[]>(() => [
     slotName: 'index',
   },
   {
-    title: t('名称'),
-    dataIndex: 'webName',
-    slotName: 'webName',
+    title: t('模块名'),
+    dataIndex: 'moduleName',
+    slotName: 'moduleName',
   },
   {
-    title: t('描述'),
-    dataIndex: 'webDescript',
-    slotName: 'webDescript',
+    title: t('状态'),
+    dataIndex: 'moduleType',
+    slotName: 'moduleType',
   },
   {
-    title: t('网址'),
-    dataIndex: 'webUrl',
-    slotName: 'webUrl',
+    title: t('更新时间'),
+    dataIndex: 'updateTime',
+    slotName: 'updateTime',
   },
   {
-    title: t('是否有效'),
-    dataIndex: 'webAccess',
-    slotName: 'webAccess',
-    width:100
+    title: t('创建时间'),
+    dataIndex: 'createTime',
+    slotName: 'createTime',
   },
-  {
-    title: t('邮箱'),
-    dataIndex: 'webEmail',
-    slotName: 'webEmail',
-  },
+
   {
     title: t('searchTable.columns.operations'),
     dataIndex: 'operations',
@@ -242,11 +245,11 @@ const columns = computed<TableColumnData[]>(() => [
 ]);
 
 const fetchData = async (
-    params: friendLinkParams = { current: 1, pageSize: 10 }
+    params: userParams = { current: 1, pageSize: 10 }
 ) => {
   setLoading(true);
   try {
-    const { data } = await queryFriendLink(params);
+    const { data } = await queryAngryPig(params);
     renderData.value = data.records;
     pagination.current = params.current;
     pagination.total = data.total;
@@ -271,6 +274,14 @@ const onPageChange = (current: number) => {
 const reset = () => {
   formModel.value = generateFormModel();
 };
+
+const deleteItem = async (ids:number) => {
+  console.log(ids)
+  await deleteModules([ids]);
+
+  Message.success("删除成功");
+  search()
+}
 
 watch(
     () => columns.value,
