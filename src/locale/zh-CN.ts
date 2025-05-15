@@ -57,6 +57,8 @@ export default {
   'menu.friendLink.list': '友链列表',
   'menu.miraiNote': '未来日记',
   'menu.miraiNote.list': '日记列表',
+  'menu.dict': '字典',
+  'menu.dict.list': '字典列表',
   ...localeSettings,
   ...localeMessageBox,
   ...localeLogin,

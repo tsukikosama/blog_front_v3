@@ -70,7 +70,6 @@
       </a-col>
     </a-row>
 
-
     </a-card>
     <a-divider style="margin-top: 0" />
     <v-md-editor v-model="formModel.content"
