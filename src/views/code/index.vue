@@ -2,49 +2,6 @@
   <div class="container">
     <Breadcrumb :items="['标签', '标签列表']" />
     <a-card class="general-card" :title="$t('标签列表')">
-      <a-row>
-        <a-col :flex="1">
-          <a-form
-              :model="formModel"
-              :label-col-props="{ span: 6 }"
-              :wrapper-col-props="{ span: 18 }"
-              label-align="left"
-          >
-            <a-row :gutter="16">
-              <a-col :span="8">
-                <a-form-item
-                    field="tagName"
-                    label="标签名"
-                >
-                  <a-input
-                      v-model="formModel.tagName"
-                      placeholder="请输入标签名"
-                      allow-clear
-                  />
-                </a-form-item>
-              </a-col>
-            </a-row>
-          </a-form>
-        </a-col>
-        <a-divider style="height: 84px" direction="vertical" />
-        <a-col :flex="'86px'" style="text-align: right">
-          <a-space direction="vertical" :size="18">
-            <a-button type="primary" @click="search">
-              <template #icon>
-                <icon-search />
-              </template>
-              {{ $t('searchTable.form.search') }}
-            </a-button>
-            <a-button @click="reset">
-              <template #icon>
-                <icon-refresh />
-              </template>
-              {{ $t('searchTable.form.reset') }}
-            </a-button>
-          </a-space>
-        </a-col>
-      </a-row>
-      <a-divider style="margin-top: 0" />
       <a-row style="margin-bottom: 16px">
         <a-col :span="12">
           <a-space>
@@ -66,7 +23,6 @@
             :span="12"
             style="display: flex; align-items: center; justify-content: end"
         >
-
           <a-tooltip :content="$t('searchTable.actions.refresh')">
             <div class="action-icon" @click="search"
             ><icon-refresh size="18"
@@ -113,7 +69,7 @@
         </template>
         <template #operations="{ record }">
           <a-button  size="small" type="text" @click="deleteTag(record.id)">
-            更新
+            新增
           </a-button>
           <a-button  size="small" type="text" @click="deleteTag(record.id)">
             {{ $t('searchTable.columns.operations.delete') }}
@@ -135,7 +91,7 @@
 import { computed, ref, reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import useLoading from '@/hooks/loading';
-import FormModal from '@/views/type/form-model.vue'
+import FormModal from '@/views/code/form-model.vue'
 import { PolicyParams } from '@/api/list';
 import { Pagination } from '@/types/global';
 import type { SelectOptionData } from '@arco-design/web-vue/es/select/interface';
@@ -144,6 +100,8 @@ import cloneDeep from 'lodash/cloneDeep';
 import {deleteUserById, queryUser, resetPwd, userParams, userResponse} from "@/api/blog/user";
 import {Message} from "@arco-design/web-vue";
 import {deleteTagById, queryType, typeListRes, Types} from "@/api/blog/type";
+
+import {Code, queryCodeList} from "@/api/blog/code";
 
 
 type Column = TableColumnData & { checked?: true };
@@ -155,7 +113,7 @@ const generateFormModel = () => {
 };
 const { loading, setLoading } = useLoading(true);
 const { t } = useI18n();
-const renderData = ref<Types[]>([]);
+const renderData = ref<Code[]>([]);
 const formModel = ref(generateFormModel());
 const cloneColumns = ref<Column[]>([]);
 const showColumns = ref<Column[]>([]);
@@ -207,7 +165,7 @@ const fetchData = async (
 ) => {
   setLoading(true);
   try {
-    const { data } = await queryType(params);
+    const { data } = await queryCodeList();
     renderData.value = data.records;
     pagination.current = params.current;
     pagination.total = data.total;

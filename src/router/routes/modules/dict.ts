@@ -3,7 +3,7 @@ import { AppRouteRecordRaw } from '../types';
 
 
 const DASHBOARD: AppRouteRecordRaw = {
-    path: '/dict',
+    path: '/code',
     name: 'dict',
     component: DEFAULT_LAYOUT,
     meta: {
@@ -16,7 +16,7 @@ const DASHBOARD: AppRouteRecordRaw = {
         {
             path: 'list',
             name: 'dictList',
-            component: () => import('@/views/dict/index.vue'),
+            component: () => import('@/views/code/index.vue'),
             meta: {
                 locale: 'menu.dict.list',
                 requiresAuth: true,
