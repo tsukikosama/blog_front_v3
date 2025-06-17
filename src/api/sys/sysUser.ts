@@ -1,6 +1,6 @@
 import axios from "axios";
 import qs from "query-string";
-import {Pagination} from "@/types/global";
+import {PageQuery, PageRes, Pagination} from "@/types/global";
 
 export interface User {
     id: number;
@@ -12,17 +12,15 @@ export interface User {
     description: string;
     deptId: string;
 }
-export interface UserQueryParams extends Pagination{
+export interface UserQueryParams extends PageQuery{
     nickname: string;
 }
 
-export interface UserPage extends Pagination{
 
-}
 
 
 export function pageSysPage(req:UserQueryParams){
-    return axios.get<User[]>('/sys/user/page',{
+    return axios.get<PageRes<User[]>>('/sys/user/page',{
         params: req
     })
 }

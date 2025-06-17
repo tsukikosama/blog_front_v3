@@ -404,7 +404,6 @@ const initType = async () => {
 const batchDelete = () => {
   if (selectedKeys.value.length === 0) {
     Message.info("请选择需要删除的博客")
-    return
   }
 }
 
@@ -413,8 +412,9 @@ const fetchData = async (
 ) => {
   setLoading(true);
   try {
+
     const {data} = await pageSysPage(params);
-    renderData.value = data.records;
+    renderData.value = data.list;
     pagination.current = params.current;
     pagination.total = data.total;
     pagination.pageSize = data.size
@@ -447,12 +447,12 @@ const addOrUpdate = (id?: string) => {
 
 const deleteBlog = async (ids: number | number[]) => {
   const idList: number[] = Array.isArray(ids) ? ids : [ids];
-  const {data} = await deleteBlogs(idList)
-  Message.info(data)
+  // const {data} = await deleteBlogs(idList)
+  // Message.info(data)
   search()
 }
 const getTagName = (ids: number[]) => {
-  if (!ids) return []
+  // if (!ids) return []
   return TypeList.value.filter(tag => ids.includes(tag.id as number)).map(tag => tag.tagName);
 }
 
