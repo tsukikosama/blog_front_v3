@@ -196,6 +196,8 @@ import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
 import {deleteUserById, queryUser, resetPwd, userParams, userResponse} from "@/api/blog/user";
 import {Message} from "@arco-design/web-vue";
+import {pageSysPage, type SysUser} from "@/api/sys/sysUser";
+
 
 type Column = TableColumnData & { checked?: true };
 
@@ -209,7 +211,7 @@ const generateFormModel = () => {
 };
 const { loading, setLoading } = useLoading(true);
 const { t } = useI18n();
-const renderData = ref<userResponse[]>([]);
+const renderData = ref<SysUser[]>([]);
 const formModel = ref(generateFormModel());
 const cloneColumns = ref<Column[]>([]);
 const showColumns = ref<Column[]>([]);
@@ -319,8 +321,9 @@ const fetchData = async (
 ) => {
   setLoading(true);
   try {
-    const { data } = await queryUser(params);
-    renderData.value = data.records;
+    const { data } = await pageSysPage(params);
+    console.log(data)
+    renderData.value = data.list;
     pagination.current = params.current;
     pagination.total = data.total;
     pagination.pageSize = data.size

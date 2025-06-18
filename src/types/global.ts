@@ -35,3 +35,26 @@ export interface GeneralChart {
   xAxis: string[];
   data: Array<{ name: string; value: number[] }>;
 }
+
+/** 接口返回数据格式 */
+export interface ApiRes<T> {
+  code: number
+  data: T
+  msg: string
+  success: boolean
+  timestamp: string
+}
+
+/** 分页响应数据格式 */
+export interface PageRes<T> {
+  records: T
+  total: number
+  current:number
+  size:number
+}
+
+/** 分页请求数据格式 */
+export interface PageQuery {
+  current: number
+  pageSize: number
+}

@@ -98,7 +98,7 @@
               <template #icon>
                 <icon-plus/>
               </template>
-              发布
+              新增
             </a-button>
             <a-upload action="/">
               <template #upload-button>
@@ -179,7 +179,7 @@
             >
               <img
                   alt="avatar"
-                  :src="record.picture"
+                  :src="record.avatar"
               />
             </a-avatar>
           </a-space>
@@ -206,9 +206,8 @@
         </template>
 
         <template #status="{ record }">
-          <span v-if="record.status === 'offline'" class="circle"></span>
-          <span v-else class="circle pass"></span>
-          {{ $t(`searchTable.form.status.${record.status}`) }}
+
+          {{ record.status }}
         </template>
 <!--        <template #isValid="{ record }">-->
 <!--          <a-tag v-if="record.isValid == 1">发布</a-tag>-->
@@ -236,11 +235,6 @@
         @success="fetchData()"
     >
     </form-modal>
-    <ReviewFrom :id="viewTableVisible.id"
-                v-model:visible="viewTableVisible.visible"
-                @success="fetchData()">
-
-    </ReviewFrom>
   </div>
 
 </template>
@@ -249,13 +243,12 @@
 import {computed, ref, reactive, watch} from 'vue';
 import {useI18n} from 'vue-i18n';
 import useLoading from '@/hooks/loading';
-import FormModal from '@/views/blogUser/form-model.vue';
+import FormModal from '@/views/sys/sysuser/form-model.vue';
 import {PolicyParams} from '@/api/list';
 import {Pagination} from '@/types/global';
 import type {TableColumnData} from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
 import {useRouter} from "vue-router";
-import ReviewFrom from "@/views/blog/review_from.vue";
 import {getTypeList, Types} from "@/api/blog/type";
 import {Message} from "@arco-design/web-vue";
 import {type User, type UserQueryParams, pageSysPage} from "@/api/sys/sysUser";
@@ -326,53 +319,71 @@ const columns = computed<TableColumnData[]>(() => [
     width: 50,
   },
   {
-    title: t('标题'),
-    dataIndex: 'title',
-    slotName: 'title',
+    title: t('账号'),
+    dataIndex: 'username',
+    slotName: 'username',
     width: 100,
   },
   {
-    title: t('首图'),
-    dataIndex: 'picture',
-    slotName: 'picture',
+    title: t('头像'),
+    dataIndex: 'avatar',
+    slotName: 'avatar',
     width: 100,
   },
   {
-    title: t('内容'),
-    dataIndex: 'content',
-    slotName: 'content',
+    title: t('昵称'),
+    dataIndex: 'nickname',
+    slotName: 'nickname',
     width: 150,
     ellipsis: true,
     tooltip: true
   },
   {
-    title: t('发布日期'),
-    dataIndex: 'createDate',
-    slotName: 'createDate',
+    title: t('邮箱'),
+    dataIndex: 'email',
+    slotName: 'email',
     width: 120
   },
   {
-    title: t('标签'),
-    dataIndex: 'tagId',
-    slotName: 'tagId',
+    title: t('手机'),
+    dataIndex: 'phone',
+    slotName: 'phone',
     width: 200
   },
   {
-    title: t('流量次数'),
-    dataIndex: 'visit',
-    slotName: 'visit',
+    title: t('描述'),
+    dataIndex: 'description',
+    slotName: 'description',
     width: 100
   },
   {
-    title: t('发布者'),
-    dataIndex: 'nickname',
-    slotName: 'nickname',
+    title: t('状态'),
+    dataIndex: 'status',
+    slotName: 'status',
     width: 100
   },
   {
-    title: t('用户头像'),
-    dataIndex: 'avatar',
-    slotName: 'avatar',
+    title:"创建时间",
+    dataIndex: 'createTime',
+    slotName: 'createTime',
+    width: 100
+  },
+  {
+    title:"创建人",
+    dataIndex: 'createUser',
+    slotName: 'createUser',
+    width: 100
+  },
+  {
+    title:"更新时间",
+    dataIndex: 'updateUser',
+    slotName: 'updateUser',
+    width: 100
+  },
+  {
+    title:"更新人",
+    dataIndex: 'updateUser',
+    slotName: 'updateUser',
     width: 100
   },
   // {
@@ -397,8 +408,8 @@ const onSelect = (dateString: string[]) => {
 
 const TypeList = ref<Types[]>([])
 const initType = async () => {
-  const res = await getTypeList();
-  TypeList.value = res.data
+  // const res = await getTypeList();
+  // TypeList.value = res.data
 }
 
 const batchDelete = () => {
@@ -414,8 +425,9 @@ const fetchData = async (
   try {
 
     const {data} = await pageSysPage(params);
-    renderData.value = data.list;
-    pagination.current = params.current;
+    console.log(data)
+    renderData.value = data.records;
+    pagination.current = data.current;
     pagination.total = data.total;
     pagination.pageSize = data.size
   } catch (err) {
@@ -442,7 +454,8 @@ const reset = () => {
 };
 
 const addOrUpdate = (id?: string) => {
-  router.push({name: 'blogedit', params: {id}});
+  formModalVisible.visible = true;
+  formModalVisible.id = '';
 }
 
 const deleteBlog = async (ids: number | number[]) => {
