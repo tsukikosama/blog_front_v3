@@ -72,20 +72,32 @@
 
     </a-card>
     <a-divider style="margin-top: 0" />
-    <v-md-editor v-model="formModel.content"
-                 height="550px"
-    ></v-md-editor>
+    <div  style="border: 1px solid #ccc">
+      <Toolbar
+          style="border-bottom: 1px solid #ccc"
+          :editor="editorRef"
+          :default-config="toolbarConfig"
+      />
+      <Editor
+          style="height: 500px; overflow-y: auto"
+          v-model="formModel.content"
+          :default-config="editorConfig"
+          @onCreated="handleCreated"
+      />
+    </div>
 
   </div>
 
 </template>
 
 <script setup lang="ts">
-import {onMounted, ref, watch} from 'vue'
+import {onBeforeUnmount, onMounted, ref, shallowRef, watch} from 'vue'
 import {getTypeList, Types} from "@/api/blog/type";
 import {getBlogById, saveBlog, updateBlog} from "@/api/blog/blog";
 import {Message} from "@arco-design/web-vue";
 import {useRoute, useRouter} from "vue-router";
+import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
+import '@wangeditor/editor/dist/css/style.css'
 
 const text = ref("")
 
@@ -150,6 +162,44 @@ onMounted(() => {
   }
 });
 
+// 配置项
+const toolbarConfig = {
+
+}
+// 编辑器实例（必须用 shallowRef）
+const editorRef = shallowRef()
+const handleCreated = (editor) => {
+  editorRef.value = editor
+}
+// 销毁编辑器
+onBeforeUnmount(() => {
+  const editor = editorRef.value
+  if (editor == null) return
+  editor.destroy()
+})
+const editorConfig = {
+  placeholder: '请输入内容...',
+  MENU_CONF: {
+    uploadImage: {
+      server: `${import.meta.env.VITE_API_BASE_URL}/common/file/upload`,
+      fieldName: 'file', // 上传字段名，后端要对应
+      headers: {
+        'Authorization': `${localStorage.getItem('token')}`
+      },
+      maxFileSize: 2 * 1024 * 1024, // 2MB
+      allowedFileTypes: ['image/*'], // 限制类型
+      customInsert(res, insertFn) {
+        // 假设后端返回格式如下：
+        console.log(res.data)
+        const url = res.data || ''
+        const alt = '图片'
+        const href = url
+        // ✅ 调用 insertFn 插入图片
+        insertFn(url, alt, href)
+      },
+    }
+  }
+}
 
 </script>
 
