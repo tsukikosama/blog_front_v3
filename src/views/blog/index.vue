@@ -64,6 +64,8 @@
                 >
                   <a-range-picker
                       @select="onSelect"
+                      show-time
+
                       style="width: 254px; marginBottom: 20px;"
                   />
                 </a-form-item>
