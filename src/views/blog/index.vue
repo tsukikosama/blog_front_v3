@@ -39,7 +39,7 @@
                 >
                   <a-select
                       v-model="formModel.tagId"
-                      :options="TypeList"
+                      :options="TagList"
                       :field-names="fieldNames"
                       placeholder="请选择标签"
                       allow-clear
@@ -63,9 +63,9 @@
                     label="时间"
                 >
                   <a-range-picker
-                      @select="onSelect"
+                      format="YYYY-MM-DD HH:mm:ss"
                       show-time
-
+                      v-model="formModel.createTime"
                       style="width: 254px; marginBottom: 20px;"
                   />
                 </a-form-item>
@@ -260,8 +260,9 @@ import cloneDeep from 'lodash/cloneDeep';
 import {Blog, blogParams, deleteBlogs, queryBlog} from "@/api/blog/blog";
 import {useRouter} from "vue-router";
 import ReviewFrom from "@/views/blog/review_from.vue";
-import {getTypeList, Types} from "@/api/blog/type";
+import {getTagList, Tag} from "@/api/blog/tag";
 import {Message} from "@arco-design/web-vue";
+import {useDict} from "@/hooks/useDict";
 
 type SizeProps = 'mini' | 'small' | 'medium' | 'large';
 type Column = TableColumnData & { checked?: true };
@@ -272,8 +273,7 @@ const generateFormModel = () => {
     userId: '',
     tagId: '',
     status: '',
-    startTime: '',
-    endTime: ''
+    createTime: []
   };
 };
 const fieldNames = {value: 'id', label: 'tagName'}
@@ -393,15 +393,11 @@ const columns = computed<TableColumnData[]>(() => [
   },
 ]);
 
-const onSelect = (dateString: string[]) => {
-  formModel.value.startTime = dateString[0] as string
-  formModel.value.endTime = dateString[1] as string
-}
 
-const TypeList = ref<Types[]>([])
+const TagList = ref<Tag[]>([])
 const initType = async () => {
-  const res = await getTypeList();
-  TypeList.value = res.data
+  const res = await getTagList();
+  TagList.value = res.data
 }
 
 const batchDelete = () => {
@@ -457,7 +453,7 @@ const deleteBlog = async (ids: number | number[]) => {
 }
 const getTagName = (ids: number[]) => {
   if (!ids) return []
-  return TypeList.value.filter(tag => ids.includes(tag.id as number)).map(tag => tag.tagName);
+  return TagList.value.filter(tag => ids.includes(tag.id as number)).map(tag => tag.tagName);
 }
 
 watch(

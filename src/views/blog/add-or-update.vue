@@ -92,7 +92,7 @@
 
 <script setup lang="ts">
 import {onBeforeUnmount, onMounted, ref, shallowRef, watch} from 'vue'
-import {getTypeList, Types} from "@/api/blog/type";
+import {getTypeList, Types} from "@/api/blog/tag";
 import {getBlogById, saveBlog, updateBlog} from "@/api/blog/blog";
 import {Message} from "@arco-design/web-vue";
 import {useRoute, useRouter} from "vue-router";

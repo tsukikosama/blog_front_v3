@@ -249,7 +249,7 @@ import {Pagination} from '@/types/global';
 import type {TableColumnData} from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
 import {useRouter} from "vue-router";
-import {getTypeList, Types} from "@/api/blog/type";
+import {getTypeList, Types} from "@/api/blog/tag";
 import {Message} from "@arco-design/web-vue";
 import {type User, type UserQueryParams, pageSysPage} from "@/api/sys/sysUser";
 

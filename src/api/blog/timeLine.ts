@@ -1,6 +1,6 @@
 import axios from "axios";
 import qs from "query-string";
-import {Types} from "@/api/blog/type";
+import {Types} from "@/api/blog/tag";
 import {Blog, blogListRes, blogParams} from "@/api/blog/blog";
 
 export interface TimeLine {

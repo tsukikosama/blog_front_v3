@@ -143,7 +143,7 @@ import type { TableColumnData } from '@arco-design/web-vue/es/table/interface';
 import cloneDeep from 'lodash/cloneDeep';
 import {deleteUserById, queryUser, resetPwd, userParams, userResponse} from "@/api/blog/user";
 import {Message} from "@arco-design/web-vue";
-import {deleteTagById, queryType, typeListRes, Types} from "@/api/blog/type";
+import {deleteTagById, queryType, typeListRes, Types} from "@/api/blog/tag";
 
 
 type Column = TableColumnData & { checked?: true };

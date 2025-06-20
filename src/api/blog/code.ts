@@ -1,6 +1,6 @@
 import axios from "axios";
 import qs from "query-string";
-import { typeParams, Types} from "@/api/blog/type";
+import { typeParams, Types} from "@/api/blog/tag";
 import {saveBlog} from "@/api/blog/blog";
 
 export interface Code {
